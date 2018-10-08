@@ -26,8 +26,8 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v120</PlatformToolset>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -47,7 +47,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -61,35 +61,81 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <Optimization>Disabled</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;__QC_OS_WIN32__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>false</SDLCheck>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
+      <AdditionalIncludeDirectories>.\Include;.\base;.\util;.\ext\curllib;.\ext\jpeglib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>.\ext;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>jpeglib.lib;curllib.lib;shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="base\CBaseObject.h" />
+    <ClInclude Include="base\CIOBase.h" />
+    <ClInclude Include="base\CIOFile.h" />
+    <ClInclude Include="base\CMutexLock.h" />
+    <ClInclude Include="base\CNodeList.h" />
+    <ClInclude Include="base\CRegMng.h" />
+    <ClInclude Include="base\CThreadWork.h" />
+    <ClInclude Include="base\ULogFunc.h" />
+    <ClInclude Include="base\USystemFunc.h" />
+    <ClInclude Include="base\UThreadFunc.h" />
+    <ClInclude Include="ext\curllib\curl.h" />
+    <ClInclude Include="ext\curllib\curlbuild.h" />
+    <ClInclude Include="ext\curllib\curlrules.h" />
+    <ClInclude Include="ext\curllib\curlver.h" />
+    <ClInclude Include="ext\jpeglib\jconfig.h" />
+    <ClInclude Include="ext\jpeglib\jdct.h" />
+    <ClInclude Include="ext\jpeglib\jerror.h" />
+    <ClInclude Include="ext\jpeglib\jinclude.h" />
+    <ClInclude Include="ext\jpeglib\jmemsys.h" />
+    <ClInclude Include="ext\jpeglib\jmorecfg.h" />
+    <ClInclude Include="ext\jpeglib\jpegint.h" />
+    <ClInclude Include="ext\jpeglib\jpeglib.h" />
+    <ClInclude Include="ext\jpeglib\jversion.h" />
     <ClInclude Include="Pic2Html.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="ui\CWndBase.h" />
+    <ClInclude Include="ui\CWndJpeg.h" />
+    <ClInclude Include="util\CJpegBase.h" />
+    <ClInclude Include="util\CJpegDec.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="base\CBaseObject.cpp" />
+    <ClCompile Include="base\CIOBase.cpp" />
+    <ClCompile Include="base\CIOFile.cpp" />
+    <ClCompile Include="base\CMutexLock.cpp" />
+    <ClCompile Include="base\CNodeList.cpp" />
+    <ClCompile Include="base\CRegMng.cpp" />
+    <ClCompile Include="base\CThreadWork.cpp" />
+    <ClCompile Include="base\ULogFunc.c" />
+    <ClCompile Include="base\USystemFunc.cpp" />
+    <ClCompile Include="base\UThreadFunc.cpp" />
     <ClCompile Include="Pic2Html.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="ui\CWndBase.cpp" />
+    <ClCompile Include="ui\CWndJpeg.cpp" />
+    <ClCompile Include="util\CJpegBase.cpp" />
+    <ClCompile Include="util\CJpegDec.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Pic2Html.rc" />

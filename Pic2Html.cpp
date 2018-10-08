@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "Pic2Html.h"
 
+#include "CJpegDec.h"
+
 #define MAX_LOADSTRING 100
 
 // Global Variables:
@@ -13,6 +15,8 @@ ATOM				MyRegisterClass(HINSTANCE hInstance);
 BOOL				InitInstance(HINSTANCE, int);
 LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK	About(HWND, UINT, WPARAM, LPARAM);
+
+CJpegDec jpegDec;
 
 int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -65,7 +69,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 	wcex.hInstance		= hInstance;
 	wcex.hIcon			= LoadIcon(hInstance, MAKEINTRESOURCE(IDI_PIC2HTML));
 	wcex.hCursor		= LoadCursor(NULL, IDC_ARROW);
-	wcex.hbrBackground	= (HBRUSH)(COLOR_WINDOW+1);
+	wcex.hbrBackground = (HBRUSH)(COLOR_GRAYTEXT);
 	wcex.lpszMenuName	= MAKEINTRESOURCE(IDC_PIC2HTML);
 	wcex.lpszClassName	= szWindowClass;
 	wcex.hIconSm		= LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
@@ -76,19 +80,19 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
    HWND hWnd;
-
    hInst = hInstance; // Store instance handle in our global variable
-
    hWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
       CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, NULL, NULL, hInstance, NULL);
-
    if (!hWnd)
-   {
       return FALSE;
-   }
+
+   jpegDec.OpenSource("C:\\Temp\\timg.jpg");
 
    ShowWindow(hWnd, nCmdShow);
+   SendMessage(hWnd, WM_SYSCOMMAND, SC_MAXIMIZE, 0);
    UpdateWindow(hWnd);
+
+   jpegDec.Enc(NULL, NULL, "C:\\Temp\\111.jpg");
 
    return TRUE;
 }
@@ -107,6 +111,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		// Parse the menu selections:
 		switch (wmId)
 		{
+		case ID_FILE_OPEN:
+			break;
+
 		case IDM_ABOUT:
 			DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
 			break;
@@ -119,7 +126,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 	case WM_PAINT:
 		hdc = BeginPaint(hWnd, &ps);
-		// TODO: Add any drawing code here...
+		jpegDec.Draw(hdc);
 		EndPaint(hWnd, &ps);
 		break;
 	case WM_DESTROY:
