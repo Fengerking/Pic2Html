@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "Pic2Html.h"
 
-#include "CJpegDec.h"
+#include "CJpegFunc.h"
 
 #define MAX_LOADSTRING 100
 
@@ -16,7 +16,7 @@ BOOL				InitInstance(HINSTANCE, int);
 LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK	About(HWND, UINT, WPARAM, LPARAM);
 
-CJpegDec jpegDec;
+CJpegFunc jpgFunc;
 
 int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -86,13 +86,15 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    if (!hWnd)
       return FALSE;
 
-   jpegDec.OpenSource("C:\\Temp\\timg.jpg");
+//   jpgFunc.Dec("C:\\Temp\\timg.jpg");
 
    ShowWindow(hWnd, nCmdShow);
    SendMessage(hWnd, WM_SYSCOMMAND, SC_MAXIMIZE, 0);
    UpdateWindow(hWnd);
 
-   jpegDec.Enc(NULL, NULL, "C:\\Temp\\111.jpg");
+   RECT rcJpeg;
+   SetRect(&rcJpeg, 20, 20, 600, 600);
+//   jpgFunc.Enc(&rcJpeg, 65, "C:\\Temp\\111.jpg");
 
    return TRUE;
 }
@@ -126,7 +128,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 	case WM_PAINT:
 		hdc = BeginPaint(hWnd, &ps);
-		jpegDec.Draw(hdc);
+		jpgFunc.Draw(hWnd, hdc, NULL);
 		EndPaint(hWnd, &ps);
 		break;
 	case WM_DESTROY:

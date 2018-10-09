@@ -113,8 +113,7 @@
     <ClInclude Include="targetver.h" />
     <ClInclude Include="ui\CWndBase.h" />
     <ClInclude Include="ui\CWndJpeg.h" />
-    <ClInclude Include="util\CJpegBase.h" />
-    <ClInclude Include="util\CJpegDec.h" />
+    <ClInclude Include="util\CJpegFunc.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="base\CBaseObject.cpp" />
@@ -134,8 +133,7 @@
     </ClCompile>
     <ClCompile Include="ui\CWndBase.cpp" />
     <ClCompile Include="ui\CWndJpeg.cpp" />
-    <ClCompile Include="util\CJpegBase.cpp" />
-    <ClCompile Include="util\CJpegDec.cpp" />
+    <ClCompile Include="util\CJpegFunc.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Pic2Html.rc" />

@@ -117,10 +117,7 @@
     <ClInclude Include="base\UThreadFunc.h">
       <Filter>Base Files</Filter>
     </ClInclude>
-    <ClInclude Include="util\CJpegBase.h">
-      <Filter>Util Files</Filter>
-    </ClInclude>
-    <ClInclude Include="util\CJpegDec.h">
+    <ClInclude Include="util\CJpegFunc.h">
       <Filter>Util Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -167,10 +164,7 @@
     <ClCompile Include="base\UThreadFunc.cpp">
       <Filter>Base Files</Filter>
     </ClCompile>
-    <ClCompile Include="util\CJpegBase.cpp">
-      <Filter>Util Files</Filter>
-    </ClCompile>
-    <ClCompile Include="util\CJpegDec.cpp">
+    <ClCompile Include="util\CJpegFunc.cpp">
       <Filter>Util Files</Filter>
     </ClCompile>
   </ItemGroup>
