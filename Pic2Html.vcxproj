@@ -77,15 +77,23 @@
       <Optimization>Disabled</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;CURL_STATICLIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <AdditionalIncludeDirectories>.\;.\util;.\ext\jpeglib;.\ext\curllib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>.\ext</AdditionalLibraryDirectories>
+      <AdditionalDependencies>jpeglib.lib;curllib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
+      <OutputFile>$(SolutionDir)\bin\Pic2Html.exe</OutputFile>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
@@ -108,6 +116,10 @@
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="util\CCurlFunc.h" />
+    <ClInclude Include="util\CDataJson.h" />
+    <ClInclude Include="util\CJpegFunc.h" />
+    <ClInclude Include="util\CNodeList.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CPic2HtmlDlg.cpp" />
@@ -117,6 +129,10 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="util\CCurlFunc.cpp" />
+    <ClCompile Include="util\CDataJson.cpp" />
+    <ClCompile Include="util\CJpegFunc.cpp" />
+    <ClCompile Include="util\CNodeList.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Pic2Html.rc" />

@@ -1,12 +1,12 @@
 /*******************************************************************************
 	File:		CJpegFunc.h
 
-	Contains:	the message manager class header file.
+	Contains:	the jpeg func class header file.
 
-	Written by:	Bangfei Jin
+	Written by:	Ben King
 
 	Change History (most recent first):
-	2018-10-08		Bangfei			Create file
+	2018-10-08		Ben			Create file
 
 *******************************************************************************/
 #ifndef __CJpegFunc_H__
@@ -14,17 +14,16 @@
 #include <string>  
 #include <iostream>  
 
-#include "CBaseObject.h"
 #include "jpeglib.h"
 
-class CJpegFunc : public CBaseObject
+class CJpegFunc
 {
 public:
     CJpegFunc(void);
     virtual ~CJpegFunc(void);
 
-	virtual int		Dec(const char * pFile);
-	virtual int		Enc(RECT * pRect, int nQuality, const char * pFile);
+	virtual int		Dec(const TCHAR * pFile);
+	virtual int		Enc(RECT * pRect, int nQuality, const TCHAR * pFile);
 	virtual int		Draw(HWND hWnd, HDC hDC, RECT * pDraw);
 
 	virtual int		GetWidth(void) { return m_nWidth; }

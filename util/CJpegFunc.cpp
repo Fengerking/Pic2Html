@@ -1,29 +1,27 @@
 /*******************************************************************************
 	File:		CJpegFunc.cpp
 
-	Contains:	message manager class implement code
+	Contains:	jpeg func class implement code
 
-	Written by:	Bangfei Jin
+	Written by:	Ben King
 
 	Change History (most recent first):
-	2019-10-09		Bangfei			Create file
+	2019-10-09		ben			Create file
 
 *******************************************************************************/
+#include "stdafx.h"
 #include <assert.h>  
 
-#include "qcErr.h"
 #include "CJpegFunc.h"
 
 CJpegFunc::CJpegFunc(void)
-	: CBaseObject ()
-	, m_nWidth(0)
+	: m_nWidth(0)
 	, m_nHeight(0)
 	, m_hBmpPic(NULL)
 	, m_pBmpBuff(NULL)
 	, m_hMemDC(NULL)
 	, m_hOldBmp(NULL)
 {
-	SetObjectName ("CJpegFunc");
 }
 
 CJpegFunc::~CJpegFunc(void)
@@ -31,7 +29,7 @@ CJpegFunc::~CJpegFunc(void)
 	Close();
 }
 
-int	CJpegFunc::Dec (const char * pFile)
+int	CJpegFunc::Dec(const TCHAR * pFile)
 {
 	Close();
 
@@ -40,7 +38,7 @@ int	CJpegFunc::Dec (const char * pFile)
 	struct	jpeg_decompress_struct cinfo;
 	int		i, nBytes, nLine, nRowSize, nStart;
 
-	if ((hFile = fopen(pFile, "rb")) == NULL)
+	if ((hFile = _tfopen(pFile, _T("rb"))) == NULL)
 		return -1;
 
 	cinfo.err = jpeg_std_error(&jerr);
@@ -77,15 +75,15 @@ int	CJpegFunc::Dec (const char * pFile)
 	jpeg_destroy_decompress(&cinfo);
 	fclose(hFile);
 
-	return QC_ERR_NONE;
+	return 0;
 }
 
 int CJpegFunc::Draw(HWND hWnd, HDC hDC, RECT * pDraw)
 {
 	if (m_hBmpPic == NULL)
-		return QC_ERR_STATUS;
+		return -1;
 	if (hDC == NULL && hWnd == NULL)
-		return QC_ERR_ARG;
+		return -1;
 
 	HDC hDrawDC = hDC;
 	if (hDrawDC == NULL)
@@ -112,13 +110,13 @@ int CJpegFunc::Draw(HWND hWnd, HDC hDC, RECT * pDraw)
 	StretchBlt (hDC, rcDraw.left, rcDraw.top, rcDraw.right, rcDraw.bottom, 
 				m_hMemDC, 0, 0, m_nWidth, m_nHeight, SRCCOPY);
 
-	return QC_ERR_NONE;
+	return 0;
 }
 
-int CJpegFunc::Enc(RECT * pRect, int nQuality, const char * pFile)
+int CJpegFunc::Enc(RECT * pRect, int nQuality, const TCHAR * pFile)
 {
 	if (m_pBmpBuff == NULL)
-		return QC_ERR_STATUS;
+		return -1;
 
 	struct jpeg_compress_struct cinfo;
 	struct jpeg_error_mgr		jerr;
@@ -129,7 +127,7 @@ int CJpegFunc::Enc(RECT * pRect, int nQuality, const char * pFile)
 	unsigned int				i, j, nDest;
 	JSAMPROW					jpgPointer[1]; 
 
-	if ((hFile = fopen(pFile, "wb")) == NULL) 
+	if ((hFile = _tfopen(pFile, _T("wb"))) == NULL) 
 		return -1;
 	
 	cinfo.err = jpeg_std_error(&jerr);
@@ -182,7 +180,7 @@ int CJpegFunc::Enc(RECT * pRect, int nQuality, const char * pFile)
 	jpeg_destroy_compress(&cinfo);
 	fclose(hFile);  
 
-	return QC_ERR_NONE;
+	return 0;
 }
 
 int	CJpegFunc::Close(void)
@@ -194,12 +192,16 @@ int	CJpegFunc::Close(void)
 		m_hMemDC = NULL;
 	}
 
-	QC_DEL_A(m_pBmpBuff);
+	if (m_pBmpBuff != NULL)
+	{
+		delete[]m_pBmpBuff;
+		m_pBmpBuff = NULL;
+	}
 	if (m_hBmpPic != NULL)
 	{
 		DeleteObject(m_hBmpPic);
 		m_hBmpPic = NULL;
 	}
 
-	return QC_ERR_NONE;
+	return 0;
 }
