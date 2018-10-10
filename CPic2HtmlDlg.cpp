@@ -89,6 +89,23 @@ BOOL CPic2HtmlDlg::OnInitDialog()
 
 	delete[]pFileBuff;
 
+	CJsonNode * pWordList = m_dataJson.FindNode("prism_wordsInfo");
+	CJsonNode * pFindNode = NULL;
+	NODEPOS pos = pWordList->m_lstNode.GetHeadPosition();
+	while (pos != NULL)
+	{
+		pFindNode = pWordList->m_lstNode.GetNext(pos);
+		NODEPOS pos1 = pFindNode->m_lstNode.GetHeadPosition();
+		while (pos1 != NULL)
+		{
+			pFindNode = pFindNode->m_lstNode.GetNext(pos1);
+			NODEPOS pos2 = pFindNode->m_lstNode.GetHeadPosition();
+			while (pos2 != NULL)
+			{
+				pFindNode = pFindNode->m_lstNode.GetNext(pos2);
+			}
+		}
+	}
 
 //	if (m_webView.GetSafeHwnd() != NULL)
 //		m_webView.ShowWindow(SW_HIDE);

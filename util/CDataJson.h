@@ -29,7 +29,6 @@ class CJsonNode;
 class CJsonItem
 {
 public:
-    CJsonItem(void);
 	CJsonItem(const char * pName, int nLen);
 	virtual ~CJsonItem(void);
 
@@ -43,7 +42,6 @@ public:
 class CJsonNode
 {
 public:
-    CJsonNode(void);
 	CJsonNode(const char * pName, int nLen);
 	virtual ~CJsonNode(void);
 
@@ -74,8 +72,7 @@ protected:
 	virtual int		Release (void);
 
 	virtual int		GetName(const char * pData, const char ** ppName, int * pSize);
-
-	CJsonNode *		FindNode (CJsonNode * pNode, const char * pName);
+	CJsonNode *		FindNode(CJsonNode * pParent, const char * pName);
 
 protected:
 	CJsonNode *		m_pJsonRoot;
