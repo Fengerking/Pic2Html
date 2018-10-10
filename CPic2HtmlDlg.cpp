@@ -80,11 +80,12 @@ BOOL CPic2HtmlDlg::OnInitDialog()
 	if (file.Open(szPath, CFile::modeRead, NULL) == FALSE)
 		return -1;
 	int		nFileSize = (int)file.GetLength();
-	char *	pFileBuff = new char[nFileSize];
+	char *	pFileBuff = new char[nFileSize+1];
+	pFileBuff[nFileSize] = 0;
 	file.Read(pFileBuff, nFileSize);
 	file.Close();
 
-	m_dataJson.ParseData(pFileBuff, nFileSize);
+	m_dataJson.ParseData(pFileBuff);
 
 	delete[]pFileBuff;
 

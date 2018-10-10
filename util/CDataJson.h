@@ -14,34 +14,47 @@
 
 #include "CNodeList.h"
 
+#define	SAFE_DEL_P(p)   \
+	if (p != NULL) {	\
+		delete p;		\
+		p = NULL; }		
+
+#define	SAFE_DEL_A(a)   \
+	if (a != NULL) {	\
+		delete []a;		\
+		a = NULL; }		\
+
 class CJsonNode;
 
 class CJsonItem
 {
 public:
     CJsonItem(void);
-    virtual ~CJsonItem(void);
+	CJsonItem(const char * pName, int nLen);
+	virtual ~CJsonItem(void);
 
 public:
 	char *			m_pName;
+	CJsonNode *		m_pParent;
 	char *			m_pValue;
 	bool			m_bText;
-	CJsonNode *		m_pChild;
 };
 
 class CJsonNode
 {
 public:
     CJsonNode(void);
-    virtual ~CJsonNode(void);
+	CJsonNode(const char * pName, int nLen);
+	virtual ~CJsonNode(void);
 
-	virtual void	AddItem (CJsonItem * pItem) {m_lstItem.AddTail (pItem);}
 	virtual void	AddNode (CJsonNode * pNode) {m_lstNode.AddTail (pNode);}
+	virtual void	AddItem (CJsonItem * pItem) {m_lstItem.AddTail (pItem);}
 
 public:
 	char *					m_pName;
-	CObjectList<CJsonItem>	m_lstItem;
+	CJsonNode *				m_pParent;
 	CObjectList<CJsonNode>	m_lstNode;	
+	CObjectList<CJsonItem>	m_lstItem;
 };
 
 class CDataJson
@@ -50,19 +63,19 @@ public:
     CDataJson(void);
     virtual ~CDataJson(void);
 
-	virtual	int		ParseData (char * pData, int nSize);
+	virtual	int		ParseData (const char * pData);
 
-	CJsonNode *		FindNode (char * pName);
+	CJsonNode *		FindNode (const char * pName);
 	CJsonNode *		GetRootNode (void) {return m_pJsonRoot;}
 
 protected:
-	virtual int		ParseNode (char * pData, CJsonNode * pNode);
-	virtual int		ParseList (char * pData, CJsonNode * pNode);
+	virtual int		ParseNode(CJsonNode * pParent, const char * pData);
+	virtual int		ParseList(CJsonNode * pParent, const char * pData);
 	virtual int		Release (void);
 
-	virtual int		GetName(char * pData, int nSize, char ** ppName, int * nNameLen);
+	virtual int		GetName(const char * pData, const char ** ppName, int * pSize);
 
-	CJsonNode *		FindNode (CJsonNode * pNode, char * pName);
+	CJsonNode *		FindNode (CJsonNode * pNode, const char * pName);
 
 protected:
 	CJsonNode *		m_pJsonRoot;
