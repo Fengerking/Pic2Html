@@ -172,7 +172,7 @@ int	CCurlFunc::PrepareData(const TCHAR * pFile)
 	delete[]pFileBuff;
 
 	strcat(m_pFileData, "\",");
-//	strcat(m_pFileData, "\"prob\": true}");
+	strcat(m_pFileData, "\"prob\": true}");
 
 	return 0;
 }

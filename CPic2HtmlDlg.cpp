@@ -9,6 +9,10 @@
 #define new DEBUG_NEW
 #endif
 
+#define PICHTML_SHOW_JPEG	0
+#define PICHTML_SHOW_HTML	1
+#define PICHTML_SHOW_BOTH	2
+
 // CAboutDlg dialog used for App About
 class CAboutDlg : public CDialogEx
 {
@@ -43,6 +47,7 @@ CPic2HtmlDlg::CPic2HtmlDlg(CWnd* pParent /*=NULL*/)
 	: CDialog(CPic2HtmlDlg::IDD, pParent)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+	m_nShowType = PICHTML_SHOW_JPEG;
 }
 
 void CPic2HtmlDlg::DoDataExchange(CDataExchange* pDX)
@@ -70,6 +75,7 @@ BOOL CPic2HtmlDlg::OnInitDialog()
 	CDialog::OnInitDialog();
 	InitAboutDialog();
 
+/*
 	TCHAR szPath[1024];
 	GetCurrentDirectory(sizeof(szPath), szPath);
 //	_tcscat(szPath, _T("\\TestPic\\liuyong_01.jpeg"));
@@ -89,26 +95,14 @@ BOOL CPic2HtmlDlg::OnInitDialog()
 
 	delete[]pFileBuff;
 
-	CJsonNode * pWordList = m_dataJson.FindNode("prism_wordsInfo");
-	CJsonNode * pFindNode = NULL;
-	NODEPOS pos = pWordList->m_lstNode.GetHeadPosition();
-	while (pos != NULL)
-	{
-		pFindNode = pWordList->m_lstNode.GetNext(pos);
-		NODEPOS pos1 = pFindNode->m_lstNode.GetHeadPosition();
-		while (pos1 != NULL)
-		{
-			pFindNode = pFindNode->m_lstNode.GetNext(pos1);
-			NODEPOS pos2 = pFindNode->m_lstNode.GetHeadPosition();
-			while (pos2 != NULL)
-			{
-				pFindNode = pFindNode->m_lstNode.GetNext(pos2);
-			}
-		}
-	}
+	m_dataWord.ParseData(&m_dataJson);
+
+	m_dataHtml.OutTextHtml(&m_dataWord, _T("C:\\Temp\\1111.html"));
+
 
 //	if (m_webView.GetSafeHwnd() != NULL)
 //		m_webView.ShowWindow(SW_HIDE);
+*/
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
 
@@ -147,10 +141,16 @@ void CPic2HtmlDlg::OnPaint()
 	}
 	else
 	{
-		//CDialog::OnPaint();
-		CClientDC dc(this); 
-		m_jpegFunc.Draw(m_hWnd, dc.GetSafeHdc(), NULL);
+		if (m_nShowType == PICHTML_SHOW_JPEG)
+		{
+			CClientDC dc(this); 
+			m_jpegFunc.Draw(m_hWnd, dc.GetSafeHdc(), NULL);
 
+		}
+		else
+		{
+			CDialog::OnPaint();
+		}
 	}
 }
 
@@ -196,6 +196,28 @@ LRESULT CPic2HtmlDlg::OnCurlMessage(WPARAM wParam, LPARAM lParam)
 		return S_OK;
 	}
 
+	if (m_dataJson.ParseData(m_curlFunc.GetResult()) < 0)
+	{
+		AfxMessageBox(_T("Parse json data error!"), MB_OK);
+		return -1;
+	}
+
+	if (m_dataWord.ParseData(&m_dataJson) < 0)
+	{
+		AfxMessageBox(_T("Parse word data error!"), MB_OK);
+		return -1;
+	}
+
+	if (m_dataHtml.OutTextHtml(&m_dataWord, m_strHtmlFile) < 0)
+	{
+		AfxMessageBox(_T("write html file error!"), MB_OK);
+		return -1;
+	}
+
+	m_webView.Navigate(m_strHtmlFile, NULL, NULL, NULL, NULL);
+	m_nShowType = PICHTML_SHOW_HTML;
+	InflateRect(NULL, 0, 0);
+
 	return S_OK;
 }
 
@@ -206,11 +228,19 @@ void CPic2HtmlDlg::OnFileOpen()
 	if (dlgFile.DoModal() != IDOK)
 		return;
 
-	CString strFile = dlgFile.GetPathName();
-	int nRC = m_jpegFunc.Dec(strFile);
+	m_strJpegFile = dlgFile.GetPathName();
+	int nRC = m_jpegFunc.Dec(m_strJpegFile);
 	if (nRC != 0)
 		return;
 
+	m_nShowType = PICHTML_SHOW_JPEG;
+	InflateRect(NULL, 0, 0);
+	int nPos = m_strJpegFile.ReverseFind('.');
+	m_strHtmlFile = m_strJpegFile.Left(nPos + 1);
+	m_strHtmlFile = m_strHtmlFile + _T("html");
+
+	m_curlFunc.ParseFile(m_strJpegFile, m_hWnd);
+//	m_webView.Navigate(m_strHtmlFile, NULL, NULL, NULL, NULL);
 }
 
 void CPic2HtmlDlg::OnFileExit()

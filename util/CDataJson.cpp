@@ -176,6 +176,21 @@ CJsonNode *	CDataJson::FindNode(const char * pName)
 	return FindNode(m_pJsonRoot, pName);
 }
 
+const char * CDataJson::GetValue(CJsonNode * pNode, const char * pName)
+{
+	CJsonItem * pItem = NULL;
+	NODEPOS pos = pNode->m_lstItem.GetHeadPosition();
+	while (pos != NULL)
+	{
+		pItem = pNode->m_lstItem.GetNext(pos);
+		if (strcmp(pItem->m_pName, pName) == 0)
+		{
+			return pItem->m_pValue;
+		}
+	}
+	return NULL;
+}
+
 CJsonNode *	CDataJson::FindNode(CJsonNode * pParent, const char * pName)
 {
 	CJsonNode * pFindNode = NULL;

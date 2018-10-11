@@ -4,6 +4,8 @@
 #include "CJpegFunc.h"
 #include "CCurlFunc.h"
 #include "CDataJson.h"
+#include "CDataWord.h"
+#include "CDataHtml.h"
 
 // CPic2HtmlDlg dialog
 class CPic2HtmlDlg : public CDialog
@@ -44,4 +46,11 @@ public:
 	CJpegFunc		m_jpegFunc;
 	CCurlFunc 		m_curlFunc;
 	CDataJson		m_dataJson;
+	CDataWord		m_dataWord;
+	CDataHtml		m_dataHtml;
+
+	CString			m_strJpegFile;
+	CString			m_strHtmlFile;
+
+	int				m_nShowType;
 };

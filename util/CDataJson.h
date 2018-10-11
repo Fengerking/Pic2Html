@@ -64,6 +64,7 @@ public:
 	virtual	int		ParseData (const char * pData);
 
 	CJsonNode *		FindNode (const char * pName);
+	const char *	GetValue (CJsonNode * pNode, const char * pName);
 	CJsonNode *		GetRootNode (void) {return m_pJsonRoot;}
 
 protected:
