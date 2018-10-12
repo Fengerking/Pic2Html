@@ -141,16 +141,15 @@ void CPic2HtmlDlg::OnPaint()
 	}
 	else
 	{
-		if (m_nShowType == PICHTML_SHOW_JPEG)
+		if (m_jpegFunc.GetBitmap() != NULL)
 		{
-			CClientDC dc(this); 
-			m_jpegFunc.Draw(m_hWnd, dc.GetSafeHdc(), NULL);
-
+			CPaintDC dc(this);
+			RECT rcDraw;
+			GetClientRect(&rcDraw);
+			rcDraw.right = rcDraw.right / 2;
+			m_jpegFunc.Draw(m_hWnd, dc.GetSafeHdc(), &rcDraw);
 		}
-		else
-		{
-			CDialog::OnPaint();
-		}
+		CDialog::OnPaint();
 	}
 }
 
@@ -216,7 +215,7 @@ LRESULT CPic2HtmlDlg::OnCurlMessage(WPARAM wParam, LPARAM lParam)
 
 	m_webView.Navigate(m_strHtmlFile, NULL, NULL, NULL, NULL);
 	m_nShowType = PICHTML_SHOW_HTML;
-	InflateRect(NULL, 0, 0);
+	InvalidateRect(NULL, TRUE);
 
 	return S_OK;
 }
@@ -234,7 +233,7 @@ void CPic2HtmlDlg::OnFileOpen()
 		return;
 
 	m_nShowType = PICHTML_SHOW_JPEG;
-	InflateRect(NULL, 0, 0);
+	InvalidateRect(NULL, TRUE);
 	int nPos = m_strJpegFile.ReverseFind('.');
 	m_strHtmlFile = m_strJpegFile.Left(nPos + 1);
 	m_strHtmlFile = m_strHtmlFile + _T("html");

@@ -116,10 +116,10 @@ int	CCurlFunc::DoParseFile(void)
 		m_pResultHead = (char *)m_szBufferHead.c_str();
 		m_pResultData = (char *)m_szBufferData.c_str();
 
-		CFile outFile;
-		outFile.Open(_T("C:\\Work\\Temp\\result.txt"), CFile::modeCreate | CFile::modeWrite, NULL);
-		outFile.Write(m_pResultData, m_szBufferData.length());
-		outFile.Close();
+//		CFile outFile;
+//		outFile.Open(_T("C:\\Work\\Temp\\result.txt"), CFile::modeCreate | CFile::modeWrite, NULL);
+//		outFile.Write(m_pResultData, m_szBufferData.length());
+//		outFile.Close();
 	}
 	else
 	{
