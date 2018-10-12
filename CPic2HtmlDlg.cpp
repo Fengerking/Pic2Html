@@ -75,11 +75,15 @@ BOOL CPic2HtmlDlg::OnInitDialog()
 	CDialog::OnInitDialog();
 	InitAboutDialog();
 
-/*
+#if 1
 	TCHAR szPath[1024];
 	GetCurrentDirectory(sizeof(szPath), szPath);
-//	_tcscat(szPath, _T("\\TestPic\\liuyong_01.jpeg"));
-//	m_curlFunc.ParseFile(szPath, m_hWnd);
+
+	m_strJpegFile = szPath;
+	m_strJpegFile += _T("\\TestPic\\liuyong_01.jpeg");
+	m_jpegFunc.Dec(m_strJpegFile);
+
+	// m_curlFunc.ParseFile(m_strJpegFile, m_hWnd);
 
 	CFile file;
 	_tcscat(szPath, _T("\\TestPic\\liuyong_01.json"));
@@ -95,14 +99,19 @@ BOOL CPic2HtmlDlg::OnInitDialog()
 
 	delete[]pFileBuff;
 
+	m_dataWord.SetPicSize(m_jpegFunc.GetWidth(), m_jpegFunc.GetHeight());
 	m_dataWord.ParseData(&m_dataJson);
 
-	m_dataHtml.OutTextHtml(&m_dataWord, _T("C:\\Temp\\1111.html"));
+	GetCurrentDirectory(sizeof(szPath), szPath);
+	m_strHtmlFile = szPath;
+	m_strHtmlFile += _T("\\TestPic\\liuyong_01.html");
+	m_dataWord.SetPicSize(m_jpegFunc.GetWidth(), m_jpegFunc.GetHeight());
+	m_dataHtml.OutTextHtml(&m_dataWord, m_strHtmlFile);
+	
+	m_webView.Navigate(m_strHtmlFile, NULL, NULL, NULL, NULL);
 
+#endif // _DEBUG
 
-//	if (m_webView.GetSafeHwnd() != NULL)
-//		m_webView.ShowWindow(SW_HIDE);
-*/
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
 
@@ -118,10 +127,6 @@ void CPic2HtmlDlg::OnSysCommand(UINT nID, LPARAM lParam)
 		CDialog::OnSysCommand(nID, lParam);
 	}
 }
-
-// If you add a minimize button to your dialog, you will need the code below
-//  to draw the icon.  For MFC applications using the document/view model,
-//  this is automatically done for you by the framework.
 
 void CPic2HtmlDlg::OnPaint()
 {

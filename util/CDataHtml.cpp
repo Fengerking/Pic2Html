@@ -13,6 +13,8 @@
 #include "CDataHtml.h"
 
 CDataHtml::CDataHtml(void)
+	: m_nWidth(0)
+	, m_nHeight(0)
 {
 }
 

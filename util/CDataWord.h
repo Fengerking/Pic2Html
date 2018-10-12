@@ -35,12 +35,16 @@ public:
     virtual ~CDataWord(void);
 
 	virtual	int		ParseData (CDataJson * pJson);
+	virtual void	SetPicSize(int nWidth, int nHeight) { m_nWidth = nWidth; m_nHeight = nHeight; }
 
 protected:
+	virtual int		AdjustLine(void);
 	virtual int		Release(void);
 
 protected:
 	CDataJson *				m_pDataJson;
+	int						m_nWidth;
+	int						m_nHeight;
 
 public:
 	CObjectList<wordItem>	m_lstWord;
