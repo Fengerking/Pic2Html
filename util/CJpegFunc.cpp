@@ -103,12 +103,31 @@ int CJpegFunc::Draw(HWND hWnd, HDC hDC, RECT * pDraw)
 	
 	if (m_hMemDC == NULL)
 	{
-		m_hMemDC = CreateCompatibleDC(hDC);
+		m_hMemDC = CreateCompatibleDC(hDrawDC);
 		m_hOldBmp = (HBITMAP)SelectObject(m_hMemDC, m_hBmpPic);
 	}
 
-	StretchBlt (hDC, rcDraw.left, rcDraw.top, rcDraw.right, rcDraw.bottom, 
+	int nDrawW = rcDraw.right - rcDraw.left;
+	int nDrawH = rcDraw.bottom - rcDraw.top;
+	if (nDrawW * m_nHeight > nDrawH * m_nWidth)
+	{
+		nDrawW = nDrawH * m_nWidth / m_nHeight;
+		rcDraw.left = rcDraw.left + (rcDraw.right - rcDraw.left - nDrawW) / 2;
+		rcDraw.right = rcDraw.right - (rcDraw.right - rcDraw.left - nDrawW) / 2;
+	}
+	else
+	{
+		nDrawH = nDrawW * m_nHeight / m_nWidth;
+		int nHeight = (rcDraw.bottom - rcDraw.top - nDrawH) / 2;
+		rcDraw.top = rcDraw.top + nHeight;
+		rcDraw.bottom = rcDraw.bottom - nHeight;
+	}
+
+	StretchBlt (hDC, rcDraw.left, rcDraw.top, rcDraw.right - rcDraw.left, rcDraw.bottom - rcDraw.top, 
 				m_hMemDC, 0, 0, m_nWidth, m_nHeight, SRCCOPY);
+
+	if (hDC == NULL)
+		ReleaseDC(hWnd, hDrawDC);
 
 	return 0;
 }
