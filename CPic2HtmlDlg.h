@@ -21,6 +21,7 @@ protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
 
 	virtual void InitAboutDialog(void);
+	virtual void TempTest(void);
 
 
 // Implementation

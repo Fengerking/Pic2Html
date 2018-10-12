@@ -99,7 +99,9 @@ int	CDataWord::AdjustLine(void)
 	NODEPOS		pPos = NULL;
 	wordItem *	pItem = NULL;
 	wordItem *	pPrev = NULL;
-	CObjectList<wordItem>	m_lstFree;
+	char		szJson[2048];
+	TCHAR		szWord[2048];
+	CObjectList<wordItem>	lstFree;
 
 	int		nWW = 0;
 	int		nWH = 0;
@@ -119,6 +121,38 @@ int	CDataWord::AdjustLine(void)
 			pPrev = pItem;
 			continue;
 		}
+
+		if (pItem->m_rcPos.top < pPrev->m_rcPos.bottom)
+		{
+			strcpy(szJson, pPrev->m_pTextJson);
+			strcat(szJson, pItem->m_pTextJson);
+			_tcscpy(szWord, pPrev->m_pTextWord);
+			_tcscat(szWord, pItem->m_pTextWord);
+
+			delete[]pPrev->m_pTextJson;
+			pPrev->m_pTextJson = new char[strlen(szJson) + 1];
+			strcpy(pPrev->m_pTextJson, szJson);
+			delete[]pPrev->m_pTextWord;
+			pPrev->m_pTextWord = new TCHAR[_tcslen(szWord) + 1];
+			_tcscpy(pPrev->m_pTextWord, szWord);
+
+			pPrev->m_rcPos.right = pItem->m_rcPos.right;
+			pPrev->m_ptPos[2].x = pItem->m_ptPos[2].x;
+			pPrev->m_ptPos[2].y = pItem->m_ptPos[2].y;
+			pPrev->m_ptPos[3].x = pItem->m_ptPos[3].x;
+			pPrev->m_ptPos[3].y = pItem->m_ptPos[3].y;
+			lstFree.AddTail(pItem);
+			continue;
+		}
+		pPrev = pItem;
+	}
+
+	pPos = lstFree.GetHeadPosition();
+	while (pPos != NULL)
+	{
+		pItem = lstFree.GetNext(pPos);
+		m_lstWord.Remove(pItem);
+		delete pItem;
 	}
 
 	return 0;
@@ -129,8 +163,6 @@ int	CDataWord::Release(void)
 	wordItem * pItem = m_lstWord.RemoveHead();
 	while (pItem != NULL)
 	{
-		SAFE_DEL_A(pItem->m_pTextJson);
-		SAFE_DEL_A(pItem->m_pTextWord);
 		delete pItem;
 		pItem = m_lstWord.RemoveHead();
 	}

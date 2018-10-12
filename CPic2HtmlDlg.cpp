@@ -75,42 +75,7 @@ BOOL CPic2HtmlDlg::OnInitDialog()
 	CDialog::OnInitDialog();
 	InitAboutDialog();
 
-#if 1
-	TCHAR szPath[1024];
-	GetCurrentDirectory(sizeof(szPath), szPath);
-
-	m_strJpegFile = szPath;
-	m_strJpegFile += _T("\\TestPic\\liuyong_01.jpeg");
-	m_jpegFunc.Dec(m_strJpegFile);
-
-	// m_curlFunc.ParseFile(m_strJpegFile, m_hWnd);
-
-	CFile file;
-	_tcscat(szPath, _T("\\TestPic\\liuyong_01.json"));
-	if (file.Open(szPath, CFile::modeRead, NULL) == FALSE)
-		return -1;
-	int		nFileSize = (int)file.GetLength();
-	char *	pFileBuff = new char[nFileSize+1];
-	pFileBuff[nFileSize] = 0;
-	file.Read(pFileBuff, nFileSize);
-	file.Close();
-
-	m_dataJson.ParseData(pFileBuff);
-
-	delete[]pFileBuff;
-
-	m_dataWord.SetPicSize(m_jpegFunc.GetWidth(), m_jpegFunc.GetHeight());
-	m_dataWord.ParseData(&m_dataJson);
-
-	GetCurrentDirectory(sizeof(szPath), szPath);
-	m_strHtmlFile = szPath;
-	m_strHtmlFile += _T("\\TestPic\\liuyong_01.html");
-	m_dataWord.SetPicSize(m_jpegFunc.GetWidth(), m_jpegFunc.GetHeight());
-	m_dataHtml.OutTextHtml(&m_dataWord, m_strHtmlFile);
-	
-	m_webView.Navigate(m_strHtmlFile, NULL, NULL, NULL, NULL);
-
-#endif // _DEBUG
+	TempTest();
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -269,3 +234,39 @@ void CPic2HtmlDlg::OnHelpAbout()
 	//dlgAbout.DoModal();
 }
 
+void CPic2HtmlDlg::TempTest(void)
+{
+	TCHAR szPath[1024];
+	GetCurrentDirectory(sizeof(szPath), szPath);
+
+	m_strJpegFile = szPath;
+	m_strJpegFile += _T("\\TestPic\\liuyong_01.jpeg");
+	m_jpegFunc.Dec(m_strJpegFile);
+
+	// m_curlFunc.ParseFile(m_strJpegFile, m_hWnd);
+
+	CFile file;
+	_tcscat(szPath, _T("\\TestPic\\liuyong_01.json"));
+	if (file.Open(szPath, CFile::modeRead, NULL) == FALSE)
+		return;
+	int		nFileSize = (int)file.GetLength();
+	char *	pFileBuff = new char[nFileSize + 1];
+	pFileBuff[nFileSize] = 0;
+	file.Read(pFileBuff, nFileSize);
+	file.Close();
+
+	m_dataJson.ParseData(pFileBuff);
+
+	delete[]pFileBuff;
+
+	m_dataWord.SetPicSize(m_jpegFunc.GetWidth(), m_jpegFunc.GetHeight());
+	m_dataWord.ParseData(&m_dataJson);
+
+	GetCurrentDirectory(sizeof(szPath), szPath);
+	m_strHtmlFile = szPath;
+	m_strHtmlFile += _T("\\TestPic\\liuyong_01.html");
+	m_dataWord.SetPicSize(m_jpegFunc.GetWidth(), m_jpegFunc.GetHeight());
+	m_dataHtml.OutTextHtml(&m_dataWord, m_strHtmlFile);
+
+	m_webView.Navigate(m_strHtmlFile, NULL, NULL, NULL, NULL);
+}

@@ -38,8 +38,9 @@ int	CDataHtml::OutTextHtml(CDataWord * pWord, const TCHAR * pFile)
 	{
 		pItem = pWord->m_lstWord.GetNext(pos);
 
+		WriteText(&outFile, "<p>");
 		outFile.Write(pItem->m_pTextJson, strlen(pItem->m_pTextJson));
-		outFile.Write("<br>\r\n", 6);
+		WriteText(&outFile, "</p>\r\n");
 	}
 	WriteText(&outFile, "</center>");
 

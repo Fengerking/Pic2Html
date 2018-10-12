@@ -22,6 +22,11 @@ struct wordItem {
 		m_pTextWord = NULL;
 		SetRect(&m_rcPos, 0XFFFF, 0XFFFF, 0, 0);
 	}
+	~wordItem(void)
+	{
+		SAFE_DEL_A(m_pTextJson);
+		SAFE_DEL_A(m_pTextWord);
+	}
 	char *	m_pTextJson;
 	TCHAR *	m_pTextWord;
 	RECT	m_rcPos;
