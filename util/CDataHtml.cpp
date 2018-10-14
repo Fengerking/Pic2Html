@@ -12,6 +12,12 @@
 #include "stdafx.h"
 #include "CDataHtml.h"
 
+#define STYLE_CENTER	text-align: center
+
+//<font size = "8" color = "red">
+//<p style = "text-align: center;" />
+//<p style = "height: 10px;">
+
 CDataHtml::CDataHtml(void)
 	: m_nWidth(0)
 	, m_nHeight(0)
