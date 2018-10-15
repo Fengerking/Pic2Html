@@ -26,6 +26,7 @@ CCurlFunc::CCurlFunc(void)
 	, m_nDataSize(0)
 	, m_pResultHead(NULL)
 	, m_pResultData(NULL)
+	, m_pJsonData(NULL)
 	, m_hThread(NULL)
 	, m_dwThdID(0)
 	, m_hWnd(NULL)
@@ -64,6 +65,9 @@ CCurlFunc::~CCurlFunc(void)
 
 	if (m_pFileData != NULL)
 		delete[]m_pFileData;
+
+	if (m_pJsonData != NULL)
+		delete[]m_pJsonData;
 }
 
 int CCurlFunc::ParseFile(const TCHAR * pFile, HWND hWnd)
@@ -77,6 +81,24 @@ int CCurlFunc::ParseFile(const TCHAR * pFile, HWND hWnd)
 }
 int	CCurlFunc::DoParseFile(void)
 {
+	CString strJpegFile = m_szFile;
+	int		nDotPos = strJpegFile.ReverseFind('.');
+	CString	strJsonFile = strJpegFile.Left(nDotPos);
+	strJsonFile += ".json";
+	CFile file;
+	if (file.Open(strJsonFile, CFile::modeRead, NULL) == TRUE)
+	{
+		if (m_pJsonData != NULL)
+			delete[]m_pJsonData;
+		int		nFileSize = (int)file.GetLength();
+		m_pJsonData = new char[nFileSize + 1];
+		m_pJsonData[nFileSize] = 0;
+		file.Read(m_pJsonData, nFileSize);
+		file.Close();
+		m_pResultData = m_pJsonData;
+		return 0;
+	}
+
 	if (PrepareData(m_szFile) < 0)
 		return -1;
 

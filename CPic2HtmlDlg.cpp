@@ -241,32 +241,11 @@ void CPic2HtmlDlg::TempTest(void)
 
 	m_strJpegFile = szPath;
 	m_strJpegFile += _T("\\TestPic\\liuyong_01.jpeg");
+	int nPos = m_strJpegFile.ReverseFind('.');
+	m_strHtmlFile = m_strJpegFile.Left(nPos + 1);
+	m_strHtmlFile = m_strHtmlFile + _T("html");
+
 	m_jpegFunc.Dec(m_strJpegFile);
 
-	// m_curlFunc.ParseFile(m_strJpegFile, m_hWnd);
-
-	CFile file;
-	_tcscat(szPath, _T("\\TestPic\\liuyong_01.json"));
-	if (file.Open(szPath, CFile::modeRead, NULL) == FALSE)
-		return;
-	int		nFileSize = (int)file.GetLength();
-	char *	pFileBuff = new char[nFileSize + 1];
-	pFileBuff[nFileSize] = 0;
-	file.Read(pFileBuff, nFileSize);
-	file.Close();
-
-	m_dataJson.ParseData(pFileBuff);
-
-	delete[]pFileBuff;
-
-	m_dataWord.SetPicSize(m_jpegFunc.GetWidth(), m_jpegFunc.GetHeight());
-	m_dataWord.ParseData(&m_dataJson);
-
-	GetCurrentDirectory(sizeof(szPath), szPath);
-	m_strHtmlFile = szPath;
-	m_strHtmlFile += _T("\\TestPic\\liuyong_01.html");
-	m_dataWord.SetPicSize(m_jpegFunc.GetWidth(), m_jpegFunc.GetHeight());
-	m_dataHtml.OutTextHtml(&m_dataWord, m_strHtmlFile);
-
-	m_webView.Navigate(m_strHtmlFile, NULL, NULL, NULL, NULL);
+	m_curlFunc.ParseFile(m_strJpegFile, m_hWnd);
 }

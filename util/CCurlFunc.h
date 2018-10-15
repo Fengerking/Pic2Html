@@ -50,6 +50,8 @@ protected:
 	char *			m_pResultHead;
 	char *			m_pResultData;
 
+	char *			m_pJsonData;
+
 public:
 	static size_t	CURL_CallWriteHead (const char * pData, size_t nBlock, size_t nSize, std::string * strStream);
 	static size_t	CURL_CallWriteData (const char * pData, size_t nBlock, size_t nSize, std::string * strStream);

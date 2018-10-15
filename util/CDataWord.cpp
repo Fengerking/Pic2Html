@@ -103,20 +103,14 @@ int	CDataWord::AdjustLine(void)
 	TCHAR		szWord[2048];
 	CObjectList<wordItem>	lstFree;
 
-	int		nWW = 0;
-	int		nWH = 0;
-	int		nWords = 0;
 	RECT	rcLine;
 	SetRect(&rcLine, 0, 0, 0, 0);
 	pPos = m_lstWord.GetHeadPosition();
 	while (pPos != NULL)
 	{
 		pItem = m_lstWord.GetNext(pPos);
-		if (nWW == 0)
+		if (rcLine.bottom == 0)
 		{
-			nWords = _tcslen(pItem->m_pTextWord);
-			nWW = (pItem->m_rcPos.right - pItem->m_rcPos.left) / nWords;
-			nWH = pItem->m_rcPos.bottom - pItem->m_rcPos.top;
 			memcpy(&rcLine, &pItem->m_rcPos, sizeof(RECT));
 			pPrev = pItem;
 			continue;
