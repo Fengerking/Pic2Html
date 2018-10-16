@@ -119,8 +119,8 @@ int CJpegFunc::Draw(HWND hWnd, HDC hDC, RECT * pDraw)
 	{
 		nDrawH = nDrawW * m_nHeight / m_nWidth;
 		int nHeight = (rcDraw.bottom - rcDraw.top - nDrawH) / 2;
-		rcDraw.top = rcDraw.top + nHeight;
-		rcDraw.bottom = rcDraw.bottom - nHeight;
+		rcDraw.top = rcDraw.top;
+		rcDraw.bottom = rcDraw.bottom - nHeight * 2;
 	}
 
 	StretchBlt (hDC, rcDraw.left, rcDraw.top, rcDraw.right - rcDraw.left, rcDraw.bottom - rcDraw.top, 

@@ -67,10 +67,10 @@ int	CDataHtml::OutTextHtml(CDataWord * pWord, const TCHAR * pFile)
 		{
 			int nSpltHeight = pItem->m_rcPos.top - pPrev->m_rcPos.bottom;
 			int nItemHeight = pItem->m_rcPos.bottom - pItem->m_rcPos.top;
-			int nIndex = -10;
+			int nIndex = 1;
 			while (nSpltHeight > nItemHeight * nIndex)
 			{
-				WriteText(&outFile, "<p style = \"height: 10px;\"> </p>\r\n");
+				WriteText(&outFile, "<p style = \"height: 8px;\"> </p>\r\n");
 				nIndex++;
 			}
 		}
@@ -82,7 +82,7 @@ int	CDataHtml::OutTextHtml(CDataWord * pWord, const TCHAR * pFile)
 		nCenterItm = (pItem->m_rcPos.right + pItem->m_rcPos.left) / 2;
 		if (abs(nCenterLin - nCenterItm) < nCenterWdt)
 		{
-			WriteText(&outFile, " style= \"text-align: center;\"");
+			WriteText(&outFile, " style= \"text-align: center; height: 2px;\"");
 		}
 		WriteText(&outFile, ">");
 
