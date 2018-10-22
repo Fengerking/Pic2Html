@@ -15,15 +15,19 @@
 //<font size = "8" color = "red">
 //<p style = "text-align: center;" />
 //<p style = "height: 10px;">
+//<img src="#" width="100" height="100" style=" margin-left:10px;" 
+//<img src = "ad-02.jpg" width = "400px"; height = "200px"; style = "position:absolute; left:100px; top:100px; ">
 
 CDataHtml::CDataHtml(void)
-	: m_nLeft(0)
+	: m_pJpegFunc(NULL)
+	, m_nLeft(0)
 	, m_nRight(0)
 	, m_nTop(0)
 	, m_nBottom(0)
 	, m_nLineMaxWords(0)
 	, m_nLineMinH(0)
 	, m_nFontSize(16)
+	, m_nJpegIndex(0)
 {
 }
 
@@ -36,12 +40,15 @@ int	CDataHtml::OutTextHtml(CDataWord * pWord, const TCHAR * pFile)
 	if (pWord == NULL || pFile == NULL)
 		return -1;
 
-	ParserWordInfo(pWord);
-
 	CFile outFile;
 	if (!outFile.Open(pFile, CFile::modeCreate | CFile::modeWrite, NULL))
 		return -1;
 
+	CString strPath = pFile;
+	int nPos = strPath.ReverseFind('.');
+	m_strJpegFile = strPath.Left(nPos);
+
+	ParserWordInfo(pWord);
 	WriteHead(&outFile);
 	
 	int		nLineIndex = 0;
@@ -62,11 +69,21 @@ int	CDataHtml::OutTextHtml(CDataWord * pWord, const TCHAR * pFile)
 		{
 			int nSpltHeight = pItem->m_rcPos.top - pPrev->m_rcPos.bottom;
 			int nItemHeight = pItem->m_rcPos.bottom - pItem->m_rcPos.top;
-			int nIndex = 1;
-			while (nSpltHeight > nItemHeight * nIndex)
+			int nFindImage = 0;
+			if (nSpltHeight > nItemHeight * 2)
 			{
-				WriteText(&outFile, "<p style = \"height: 8px;\">&nbsp;</p>\r\n");
-				nIndex++;
+				RECT rcArea;
+				SetRect(&rcArea, m_nLeft, pPrev->m_rcPos.bottom, m_nRight, pItem->m_rcPos.top);
+				nFindImage = CheckImageInfo(&outFile, &rcArea);
+			}
+			if (nFindImage == 0)
+			{
+				int nIndex = 1;
+				while (nSpltHeight > nItemHeight * nIndex)
+				{
+					WriteText(&outFile, "<p style = \"height: 4px;\">&nbsp;</p>\r\n");
+					nIndex++;
+				}
 			}
 		}
 
@@ -160,7 +177,7 @@ int	CDataHtml::ParserWordInfo(CDataWord * pWord)
 			m_nTop = pItem->m_rcPos.top;
 		if (pItem->m_rcPos.bottom > m_nBottom)
 			m_nBottom = pItem->m_rcPos.bottom;
-		if (m_nLineMaxWords < _tcslen(pItem->m_pTextWord))
+		if (m_nLineMaxWords < (int)_tcslen(pItem->m_pTextWord))
 		{
 			m_nLineMaxWords = _tcslen(pItem->m_pTextWord);
 			if (m_nLineMinH > (pItem->m_rcPos.bottom - pItem->m_rcPos.top))
@@ -169,6 +186,125 @@ int	CDataHtml::ParserWordInfo(CDataWord * pWord)
 	}
 
 	return 0;
+}
+
+int	CDataHtml::CheckImageInfo(CFile * pIO, RECT * pArea)
+{
+	if (m_pJpegFunc == NULL || pArea == NULL)
+		return 0;
+
+	int nImgTop = 0;
+	int nImgLeft = pArea->left;
+	int nImgBottom = pArea->bottom;
+	int nImgRight = pArea->right;
+
+	int nWidth = m_pJpegFunc->GetWidth();
+	int nHeight = m_pJpegFunc->GetHeight();
+
+	int i, j, nFind;
+	unsigned char cBlack = 0X2F;
+	unsigned char * pBmpBuff = m_pJpegFunc->GetBuffer();
+	unsigned char * pBuff = NULL;
+	for (i = pArea->top; i <= pArea->bottom; i++)
+	{
+		nFind = 0;
+		for (j = pArea->left; j < pArea->right; j++)
+		{
+			pBuff = pBmpBuff + i * nWidth * 4 + j * 4;
+			if (*(pBuff + 0) < cBlack || *(pBuff + 1) < cBlack || *(pBuff + 2) < cBlack)
+				nFind++;
+		}
+
+		if (nFind > 10) // find 10 points
+		{
+			nImgTop = i;
+			break;
+		}
+	}
+	if (nImgTop == 0)
+		return 0;
+
+	// Check the bottom
+	for (i = pArea->bottom; i >= pArea->top; i--)
+	{
+		nFind = 0;
+		for (j = pArea->left; j < pArea->right; j++)
+		{
+			pBuff = pBmpBuff + i * nWidth * 4 + j * 4;
+			if (*(pBuff + 0) < cBlack || *(pBuff + 1) < cBlack || *(pBuff + 2) < cBlack)
+				nFind++;
+		}
+
+		if (nFind > 10) // find 10 points
+		{
+			nImgBottom = i;
+			break;
+		}
+	}
+
+	// Check the left
+	for (j = pArea->left; j < pArea->right; j++)
+	{
+		nFind = 0;
+		for (i = nImgTop; i <= nImgBottom; i++)
+		{
+			pBuff = pBmpBuff + i * nWidth * 4 + j * 4;
+			if (*(pBuff + 0) < cBlack || *(pBuff + 1) < cBlack || *(pBuff + 2) < cBlack)
+				nFind++;
+		}
+		if (nFind > 10) // find 10 points
+		{
+			nImgLeft = j;
+			break;
+		}
+	}
+
+	// Check the right
+	for (j = pArea->right; j >= pArea->left; j--)
+	{
+		nFind = 0;
+		for (i = nImgTop; i <= nImgBottom; i++)
+		{
+			pBuff = pBmpBuff + i * nWidth * 4 + j * 4;
+			if (*(pBuff + 0) < cBlack || *(pBuff + 1) < cBlack || *(pBuff + 2) < cBlack)
+				nFind++;
+		}
+		if (nFind > 10) // find 10 points
+		{
+			nImgRight = j;
+			break;
+		}
+	}
+
+	CString strJpegFile;
+	strJpegFile.Format(_T("%s_%d.jpeg"), m_strJpegFile, m_nJpegIndex);
+
+	RECT rcEnc;
+	SetRect(&rcEnc, nImgLeft, nImgTop, nImgRight, nImgBottom);
+	m_pJpegFunc->Enc(&rcEnc, 65, strJpegFile);
+
+	//<img src="#" width="100" height="100" style=" margin-left:10px;" 
+	char szName[1024];
+	memset(szName, 0, sizeof(szName));
+	WideCharToMultiByte(CP_ACP, 0, strJpegFile.GetString(), -1, szName, sizeof(szName), NULL, NULL);
+
+	nWidth = (nImgRight - nImgLeft) * m_nFontSize / m_nLineMinH * 3 / 2;
+	nHeight = (nImgBottom - nImgTop) * m_nFontSize / m_nLineMinH * 3 / 2;
+	char szLine[1024];
+	sprintf(szLine, "<img src=\"%s\" style=\"width: %dpx; height: %dpx>\" \r\n", szName, nWidth, nHeight);
+
+	if (nImgLeft > m_nLeft + m_nFontSize * 4)
+		WriteText(pIO, "<p style = \"text-align: center; \"> \r\n");
+	else if (nImgRight > m_nRight - m_nFontSize * 4)
+		WriteText(pIO, "<p style = \"text-align: right; \"> \r\n");
+	else
+		WriteText(pIO, "<p style = \"text-align: left; \"> \r\n");
+
+	WriteText(pIO, szLine);
+	WriteText(pIO, "</p>\r\n");
+
+	m_nJpegIndex++;
+	return 1;
 }
 
 int	CDataHtml::WriteText(CFile * pIO, char * pText)

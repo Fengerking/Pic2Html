@@ -170,6 +170,7 @@ LRESULT CPic2HtmlDlg::OnCurlMessage(WPARAM wParam, LPARAM lParam)
 		return -1;
 	}
 
+	m_dataHtml.SetJpegFunc(&m_jpegFunc);
 	if (m_dataHtml.OutTextHtml(&m_dataWord, m_strHtmlFile) < 0)
 	{
 		AfxMessageBox(_T("write html file error!"), MB_OK);
@@ -227,7 +228,7 @@ void CPic2HtmlDlg::TempTest(void)
 
 	m_strJpegFile = szPath;
 //	m_strJpegFile += _T("\\TestPic\\liuyong_01.jpeg");
-	m_strJpegFile += _T("\\TestPic\\Test01.jpg");
+	m_strJpegFile += _T("\\TestPic\\Test02.jpg");
 	int nPos = m_strJpegFile.ReverseFind('.');
 	m_strHtmlFile = m_strJpegFile.Left(nPos + 1);
 	m_strHtmlFile = m_strHtmlFile + _T("html");
