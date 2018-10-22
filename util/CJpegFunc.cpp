@@ -123,6 +123,7 @@ int CJpegFunc::Draw(HWND hWnd, HDC hDC, RECT * pDraw)
 		rcDraw.bottom = rcDraw.bottom - nHeight * 2;
 	}
 
+	SetStretchBltMode(hDC, HALFTONE);
 	StretchBlt (hDC, rcDraw.left, rcDraw.top, rcDraw.right - rcDraw.left, rcDraw.bottom - rcDraw.top, 
 				m_hMemDC, 0, 0, m_nWidth, m_nHeight, SRCCOPY);
 

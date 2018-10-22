@@ -25,6 +25,7 @@ public:
 	virtual	int		OutTextUtf8(CDataWord * pWord, const TCHAR * pFile);
 
 protected:
+	virtual int		ParserWordInfo(CDataWord * pWord);
 	virtual int		WriteText(CFile * pIO, char * pText);
 	virtual int		WriteHead(CFile * pIO);
 	virtual int		WriteFoot(CFile * pIO);
@@ -34,7 +35,9 @@ protected:
 	int				m_nRight;
 	int				m_nTop;
 	int				m_nBottom;
-
+	int				m_nLineMaxWords;
+	int				m_nLineMinH;
+	int				m_nFontSize;
 };
 
 #endif //__CDataHtml_H__

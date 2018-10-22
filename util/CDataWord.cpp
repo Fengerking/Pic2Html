@@ -116,7 +116,7 @@ int	CDataWord::AdjustLine(void)
 			continue;
 		}
 
-		if (pItem->m_rcPos.top < pPrev->m_rcPos.bottom)
+		if (pItem->m_rcPos.top < pPrev->m_rcPos.bottom && pItem->m_rcPos.left > pPrev->m_rcPos.right)
 		{
 			strcpy(szJson, pPrev->m_pTextJson);
 			strcat(szJson, pItem->m_pTextJson);

@@ -33,9 +33,7 @@ protected:
 	afx_msg LRESULT OnCurlMessage(WPARAM wParam, LPARAM lParam);
 	afx_msg void OnFileOpen();
 	afx_msg void OnFileExit();
-	afx_msg void OnViewJPEG();
 	afx_msg void OnViewHTML();
-	afx_msg void OnViewBOTH();
 	afx_msg void OnHelpAbout();
 	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
 	afx_msg void OnPaint();
@@ -52,6 +50,4 @@ public:
 
 	CString			m_strJpegFile;
 	CString			m_strHtmlFile;
-
-	int				m_nShowType;
 };
