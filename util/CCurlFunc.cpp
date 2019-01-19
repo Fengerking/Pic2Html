@@ -45,7 +45,7 @@ CCurlFunc::CCurlFunc(void)
 
 CCurlFunc::~CCurlFunc(void)
 {
-	// wait for thread finish
+	// wait for thread finish 
 	m_hWnd = NULL;
 	while (m_hThread != NULL)
 	{

@@ -68,7 +68,7 @@ BOOL CPic2HtmlDlg::OnInitDialog()
 	CDialog::OnInitDialog();
 	InitAboutDialog();
 
-	TempTest();
+//	TempTest();
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -170,6 +170,24 @@ LRESULT CPic2HtmlDlg::OnCurlMessage(WPARAM wParam, LPARAM lParam)
 		return -1;
 	}
 
+#if 0
+	CFile txtFile;
+	CString strTxtFile = m_strJpegFile + _T(".txt");
+	if (!txtFile.Open(strTxtFile, CFile::modeCreate | CFile::modeWrite, NULL))
+		return -1;
+	wordItem * pItemWord = NULL;
+	NODEPOS pPosWord = m_dataWord.m_lstWord.GetHeadPosition();
+	while (pPosWord != NULL)
+	{
+		pItemWord = m_dataWord.m_lstWord.GetNext(pPosWord);
+		txtFile.Write(pItemWord->m_pTextJson, strlen(pItemWord->m_pTextJson));
+		txtFile.Write("\r\n", 2);
+	}
+	txtFile.Close();
+	m_webView.Navigate(strTxtFile, NULL, NULL, NULL, NULL);
+	AfxMessageBox(_T("Finished"));
+#endif // 0
+	
 	m_dataHtml.SetJpegFunc(&m_jpegFunc);
 	if (m_dataHtml.OutTextHtml(&m_dataWord, m_strHtmlFile) < 0)
 	{
@@ -180,7 +198,7 @@ LRESULT CPic2HtmlDlg::OnCurlMessage(WPARAM wParam, LPARAM lParam)
 	m_webView.Navigate(m_strHtmlFile, NULL, NULL, NULL, NULL);
 	m_webView.InvalidateRect(NULL, TRUE);
 	InvalidateRect(NULL, TRUE);
-
+	
 	return S_OK;
 }
 

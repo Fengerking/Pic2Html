@@ -329,7 +329,7 @@ int CDataHtml::WriteHead(CFile * pIO)
 
 	sprintf(szLine, "        font-size: %dpx;\r\n", m_nFontSize);
 	strcat(szHead, szLine);
-	sprintf(szLine, "        width: %dpx;\r\n", m_nFontSize * m_nLineMaxWords);
+	sprintf(szLine, "        width: %dpx;\r\n", m_nFontSize * (m_nLineMaxWords + 1));
 	strcat(szHead, szLine);
 
 	strcat(szHead, "   }\r\n");
