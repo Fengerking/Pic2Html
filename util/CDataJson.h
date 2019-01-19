@@ -1,12 +1,12 @@
 /*******************************************************************************
-	File:		CDataJson.h
+	文件:	CDataJson.h
 
-	Contains:	the data json class header file.
+	内容:	the data json class header file.
 
-	Written by:	Ben King
+	作者:	Ben King
 
-	Change History (most recent first):
-	2018-10-10		Ben			Create file
+	修改历史:
+	2018-10-10		Ben			创建文件
 
 *******************************************************************************/
 #ifndef __CDataJson_H__

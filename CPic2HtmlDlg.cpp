@@ -150,6 +150,7 @@ void CPic2HtmlDlg::InitAboutDialog(void)
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 }
 
+// 阿里云返回结果通知，继续处理
 LRESULT CPic2HtmlDlg::OnCurlMessage(WPARAM wParam, LPARAM lParam)
 {
 	if (wParam != 0)
@@ -158,36 +159,21 @@ LRESULT CPic2HtmlDlg::OnCurlMessage(WPARAM wParam, LPARAM lParam)
 		return S_OK;
 	}
 
+	// 解析阿里云返回的JSON数据
 	if (m_dataJson.ParseData(m_curlFunc.GetResult()) < 0)
 	{
 		AfxMessageBox(_T("Parse json data error!"), MB_OK);
 		return -1;
 	}
 
+	// 提取里面的文字信息
 	if (m_dataWord.ParseData(&m_dataJson) < 0)
 	{
 		AfxMessageBox(_T("Parse word data error!"), MB_OK);
 		return -1;
 	}
-
-#if 0
-	CFile txtFile;
-	CString strTxtFile = m_strJpegFile + _T(".txt");
-	if (!txtFile.Open(strTxtFile, CFile::modeCreate | CFile::modeWrite, NULL))
-		return -1;
-	wordItem * pItemWord = NULL;
-	NODEPOS pPosWord = m_dataWord.m_lstWord.GetHeadPosition();
-	while (pPosWord != NULL)
-	{
-		pItemWord = m_dataWord.m_lstWord.GetNext(pPosWord);
-		txtFile.Write(pItemWord->m_pTextJson, strlen(pItemWord->m_pTextJson));
-		txtFile.Write("\r\n", 2);
-	}
-	txtFile.Close();
-	m_webView.Navigate(strTxtFile, NULL, NULL, NULL, NULL);
-	AfxMessageBox(_T("Finished"));
-#endif // 0
 	
+	// 生成HTML文件
 	m_dataHtml.SetJpegFunc(&m_jpegFunc);
 	if (m_dataHtml.OutTextHtml(&m_dataWord, m_strHtmlFile) < 0)
 	{
@@ -195,6 +181,7 @@ LRESULT CPic2HtmlDlg::OnCurlMessage(WPARAM wParam, LPARAM lParam)
 		return -1;
 	}
 
+	// 把HTML文件在界面上显示
 	m_webView.Navigate(m_strHtmlFile, NULL, NULL, NULL, NULL);
 	m_webView.InvalidateRect(NULL, TRUE);
 	InvalidateRect(NULL, TRUE);
@@ -202,6 +189,7 @@ LRESULT CPic2HtmlDlg::OnCurlMessage(WPARAM wParam, LPARAM lParam)
 	return S_OK;
 }
 
+// 打开文件选择对话框，选择JPEG文件
 void CPic2HtmlDlg::OnFileOpen()
 {
 	CString filter = L"Picture File (*.jpeg; *.jpg)|*.jpeg;*.jpg||";
@@ -233,6 +221,7 @@ void CPic2HtmlDlg::OnViewHTML()
 	ShellExecute(NULL, _T("open"), m_strHtmlFile, NULL, NULL, SW_NORMAL);
 }
 
+// 快速测试文件
 void CPic2HtmlDlg::OnHelpAbout()
 {
 	CAboutDlg dlgAbout;

@@ -1,12 +1,12 @@
 /*******************************************************************************
-	File:		CDataWord.h
+	文件:		CDataWord.h
 
-	Contains:	the data word class header file.
+	内容:	the data word class header file.
 
-	Written by:	Ben King
+	作者:	Ben King
 
-	Change History (most recent first):
-	2018-10-10		Ben			Create file
+	修改历史:
+	2018-10-10		Ben			创建文件
 
 *******************************************************************************/
 #ifndef __CDataWord_H__
