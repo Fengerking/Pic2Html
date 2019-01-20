@@ -24,8 +24,13 @@ public:
 
 	// 解码JPEG文件。
 	virtual int		Dec(const TCHAR * pFile);
+
+	// 检查特定区域有没有插图文件。
+	virtual int		CheckSubImg(RECT * pArea, RECT * pSubImg);
+
 	// 编码JPEG文件。
 	virtual int		Enc(RECT * pRect, int nQuality, const TCHAR * pFile);
+
 	// 画JPEG文件到指定的区域的窗口上。
 	virtual int		Draw(HWND hWnd, HDC hDC, RECT * pDraw);
 

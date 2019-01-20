@@ -24,6 +24,7 @@ public:
 
 	// 设置JPEG包装类指针，进行插图判断，插图压缩。
 	virtual void	SetJpegFunc(CJpegFunc * pJpegFunc) { m_pJpegFunc = pJpegFunc; }
+	virtual void	SetPrevNextFile(TCHAR * strPrevFile, TCHAR * strNextFile);
 
 	// 输出HTML格式文件
 	// 参数：	pWord, 包含文字信息类的指针。
@@ -72,6 +73,9 @@ protected:
 
 	CString			m_strJpegFile;			// 插图压缩后的JPEG文件名
 	int				m_nJpegIndex;			// 插图的索引号
+
+	char			m_szPrevFile[256];
+	char			m_szNextFile[256];
 };
 
 #endif //__CDataHtml_H__

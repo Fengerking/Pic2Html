@@ -14,6 +14,7 @@
 
 CDataWord::CDataWord(void)
 	: m_pDataJson (NULL)
+	, m_pJpegFunc(NULL)
 	, m_nWidth(0)
 	, m_nHeight(0)
 {
@@ -131,6 +132,9 @@ int	CDataWord::AdjustLine(void)
 			_tcscpy(pPrev->m_pTextWord, szWord);
 
 			pPrev->m_rcPos.right = pItem->m_rcPos.right;
+			pPrev->m_rcPos.top = min(pPrev->m_rcPos.top, pItem->m_rcPos.top);
+			pPrev->m_rcPos.bottom = max(pPrev->m_rcPos.bottom, pItem->m_rcPos.bottom);
+
 			pPrev->m_ptPos[2].x = pItem->m_ptPos[2].x;
 			pPrev->m_ptPos[2].y = pItem->m_ptPos[2].y;
 			pPrev->m_ptPos[3].x = pItem->m_ptPos[3].x;
@@ -140,6 +144,45 @@ int	CDataWord::AdjustLine(void)
 		}
 		pPrev = pItem;
 	}
+	pPos = lstFree.GetHeadPosition();
+	while (pPos != NULL)
+	{
+		pItem = lstFree.GetNext(pPos);
+		m_lstWord.Remove(pItem);
+		delete pItem;
+	}
+	lstFree.RemoveAll();
+
+	bool bFindSubImg = false;
+	pItem = NULL;
+	pPrev = NULL;
+	pPos = m_lstWord.GetHeadPosition();
+	while (pPos != NULL)
+	{
+		if (!bFindSubImg)
+			pPrev = pItem;
+		pItem = m_lstWord.GetNext(pPos);
+		bFindSubImg = false;
+		if (pPrev == NULL || (pItem->m_rcPos.top > pPrev->m_rcPos.bottom + (pPrev->m_rcPos.bottom - pPrev->m_rcPos.top) * 2))
+		{
+			RECT rcArea;
+			SetRect(&rcArea, 0, pItem->m_rcPos.top, pItem->m_rcPos.left, pItem->m_rcPos.bottom);
+			if (m_pJpegFunc->CheckSubImg(&rcArea, NULL) > 0)
+			{
+				lstFree.AddTail(pItem);
+				bFindSubImg = true;
+			}
+			else
+			{
+				SetRect(&rcArea, pItem->m_rcPos.right, pItem->m_rcPos.top, m_pJpegFunc->GetWidth(), pItem->m_rcPos.bottom);
+				if (m_pJpegFunc->CheckSubImg(&rcArea, NULL) > 0)
+				{
+					lstFree.AddTail(pItem);
+					bFindSubImg = true;
+				}
+			}
+		}
+	}
 
 	pPos = lstFree.GetHeadPosition();
 	while (pPos != NULL)
@@ -148,6 +191,7 @@ int	CDataWord::AdjustLine(void)
 		m_lstWord.Remove(pItem);
 		delete pItem;
 	}
+	lstFree.RemoveAll();
 
 	return 0;
 }

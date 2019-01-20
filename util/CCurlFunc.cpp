@@ -79,6 +79,7 @@ int CCurlFunc::ParseFile(const TCHAR * pFile, HWND hWnd)
 		return -1;
 	return 0;
 }
+
 int	CCurlFunc::DoParseFile(void)
 {
 	CString strJpegFile = m_szFile;

@@ -14,6 +14,7 @@
 
 #include "CNodeList.h"
 #include "CDataJson.h"
+#include "CJpegFunc.h"
 
 // 文字信息结构体
 struct wordItem {
@@ -40,6 +41,9 @@ public:
     CDataWord(void);
     virtual ~CDataWord(void);
 
+	// 设置JPEG包装类指针，进行插图判断，插图压缩。
+	virtual void	SetJpegFunc(CJpegFunc * pJpegFunc) { m_pJpegFunc = pJpegFunc; }
+
 	// 解析JSON数据结构，转换为文字数组
 	virtual	int		ParseData (CDataJson * pJson);
 
@@ -54,6 +58,7 @@ protected:
 
 protected:
 	CDataJson *				m_pDataJson;	// JSON数据结构的指针
+	CJpegFunc *				m_pJpegFunc;	// JPEG的包装类指针
 	int						m_nWidth;		// 图片的宽度
 	int						m_nHeight;		// 图片的高度
 

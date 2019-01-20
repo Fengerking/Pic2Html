@@ -29,10 +29,27 @@ CDataHtml::CDataHtml(void)
 	, m_nFontSize(16)
 	, m_nJpegIndex(0)
 {
+	memset(m_szPrevFile, 0, sizeof(m_szPrevFile));
+	memset(m_szNextFile, 0, sizeof(m_szNextFile));
 }
 
 CDataHtml::~CDataHtml(void)
 {
+}
+
+void CDataHtml::SetPrevNextFile(TCHAR * strPrevFile, TCHAR * strNextFile)
+{
+	TCHAR * pFileName = 0;
+	if (strPrevFile != NULL)
+	{
+		pFileName = _tcsrchr(strPrevFile, _T('\\')) + 1;
+		WideCharToMultiByte(CP_ACP, 0, pFileName, -1, m_szPrevFile, sizeof(m_szPrevFile), NULL, NULL);
+	}
+	if (strNextFile != NULL)
+	{
+		pFileName = _tcsrchr(strNextFile, _T('\\')) + 1;
+		WideCharToMultiByte(CP_ACP, 0, pFileName, -1, m_szNextFile, sizeof(m_szNextFile), NULL, NULL);
+	}
 }
 
 int	CDataHtml::OutTextHtml(CDataWord * pWord, const TCHAR * pFile)
@@ -61,34 +78,37 @@ int	CDataHtml::OutTextHtml(CDataWord * pWord, const TCHAR * pFile)
 	char		szLine[1024];
 	wordItem *	pItem = NULL;
 	wordItem *	pPrev = NULL;
+	int			nSpltHeight = 0;
+	int			nItemHeight = 0;
+	int			nFindImage = 0;
 	NODEPOS pos = pWord->m_lstWord.GetHeadPosition();
 	while (pos != NULL)
 	{
 		pItem = pWord->m_lstWord.GetNext(pos);
+		nFindImage = 0;
+		nItemHeight = pItem->m_rcPos.bottom - pItem->m_rcPos.top;
 		if (pPrev != NULL)
+			nSpltHeight = pItem->m_rcPos.top - pPrev->m_rcPos.bottom;
+		else
+			nSpltHeight = pItem->m_rcPos.top;
+		if (nSpltHeight > nItemHeight * 2)
 		{
-			int nSpltHeight = pItem->m_rcPos.top - pPrev->m_rcPos.bottom;
-			int nItemHeight = pItem->m_rcPos.bottom - pItem->m_rcPos.top;
-			int nFindImage = 0;
-			if (nSpltHeight > nItemHeight * 2)
-			{
-				RECT rcArea;
+			RECT rcArea;
+			if (pPrev != NULL)
 				SetRect(&rcArea, m_nLeft, pPrev->m_rcPos.bottom, m_nRight, pItem->m_rcPos.top);
-				nFindImage = CheckImageInfo(&outFile, &rcArea);
-			}
-			if (nFindImage == 0)
+			else
+				SetRect(&rcArea, m_nLeft, 0, m_nRight, pItem->m_rcPos.top);
+			nFindImage = CheckImageInfo(&outFile, &rcArea);
+		}
+		if (nFindImage == 0)
+		{
+			int nIndex = 1;
+			while (nSpltHeight > nItemHeight * nIndex)
 			{
-				int nIndex = 1;
-				while (nSpltHeight > nItemHeight * nIndex)
-				{
-					WriteText(&outFile, "<p style = \"height: 4px;\">&nbsp;</p>\r\n");
-					nIndex++;
-				}
+				WriteText(&outFile, "<p style = \"height: 4px;\">&nbsp;</p>\r\n");
+				nIndex++;
 			}
 		}
-
-		if (nLineIndex == 26)
-			nLineIndex = nLineIndex;
 
 		nWordCount = _tcslen (pItem->m_pTextWord);
 		nWordWidth = (pItem->m_rcPos.right - pItem->m_rcPos.left) / nWordCount;
@@ -121,17 +141,17 @@ int	CDataHtml::OutTextHtml(CDataWord * pWord, const TCHAR * pFile)
 		}
 
 		strcpy(szLine, "<p");
-		if (nPosFlag != 0 || nFontSize != m_nFontSize)
+		if (nPosFlag != 0)// || nFontSize != m_nFontSize)
 			strcat(szLine, " style= ");
 		if (nPosFlag == 1)
 			strcat(szLine, "\"text-align: center; ");
 		else if (nPosFlag == 2)
 			strcat(szLine, "\"text-align: right; ");
 		
-		//if (nFontSize != m_nFontSize)
-		//	sprintf (szLine, "%s \"font-size: %dpx; ", szLine, nFontSize);
+//		if (nFontSize != m_nFontSize)
+//			sprintf (szLine, "%s \"font-size: %dpx; ", szLine, nFontSize);
 
-		if (nPosFlag != 0 || nFontSize != m_nFontSize)
+		if (nPosFlag != 0)// || nFontSize != m_nFontSize)
 			strcat(szLine, " \"");
 		strcat(szLine, ">");
 
@@ -148,6 +168,14 @@ int	CDataHtml::OutTextHtml(CDataWord * pWord, const TCHAR * pFile)
 
 		pPrev = pItem;
 		nLineIndex++;
+	}
+
+	int nBottom = m_pJpegFunc->GetHeight() - 10;
+	if (pItem != NULL && pItem->m_rcPos.bottom + (pItem->m_rcPos.bottom - pItem->m_rcPos.top) * 3 < nBottom)
+	{
+		RECT rcArea;
+		SetRect(&rcArea, m_nLeft, pItem->m_rcPos.bottom, m_nRight, nBottom);
+		CheckImageInfo(&outFile, &rcArea);
 	}
 
 	WriteFoot(&outFile);
@@ -193,109 +221,30 @@ int	CDataHtml::CheckImageInfo(CFile * pIO, RECT * pArea)
 	if (m_pJpegFunc == NULL || pArea == NULL)
 		return 0;
 
-	int nImgTop = 0;
-	int nImgLeft = pArea->left;
-	int nImgBottom = pArea->bottom;
-	int nImgRight = pArea->right;
-
-	int nWidth = m_pJpegFunc->GetWidth();
-	int nHeight = m_pJpegFunc->GetHeight();
-
-	int i, j, nFind;
-	unsigned char cBlack = 0X2F;
-	unsigned char * pBmpBuff = m_pJpegFunc->GetBuffer();
-	unsigned char * pBuff = NULL;
-	for (i = pArea->top; i <= pArea->bottom; i++)
-	{
-		nFind = 0;
-		for (j = pArea->left; j < pArea->right; j++)
-		{
-			pBuff = pBmpBuff + i * nWidth * 4 + j * 4;
-			if (*(pBuff + 0) < cBlack || *(pBuff + 1) < cBlack || *(pBuff + 2) < cBlack)
-				nFind++;
-		}
-
-		if (nFind > 10) // find 10 points
-		{
-			nImgTop = i;
-			break;
-		}
-	}
-	if (nImgTop == 0)
+	RECT rcEnc;
+	if (m_pJpegFunc->CheckSubImg(pArea, &rcEnc) <= 0)
 		return 0;
-
-	// Check the bottom
-	for (i = pArea->bottom; i >= pArea->top; i--)
-	{
-		nFind = 0;
-		for (j = pArea->left; j < pArea->right; j++)
-		{
-			pBuff = pBmpBuff + i * nWidth * 4 + j * 4;
-			if (*(pBuff + 0) < cBlack || *(pBuff + 1) < cBlack || *(pBuff + 2) < cBlack)
-				nFind++;
-		}
-
-		if (nFind > 10) // find 10 points
-		{
-			nImgBottom = i;
-			break;
-		}
-	}
-
-	// Check the left
-	for (j = pArea->left; j < pArea->right; j++)
-	{
-		nFind = 0;
-		for (i = nImgTop; i <= nImgBottom; i++)
-		{
-			pBuff = pBmpBuff + i * nWidth * 4 + j * 4;
-			if (*(pBuff + 0) < cBlack || *(pBuff + 1) < cBlack || *(pBuff + 2) < cBlack)
-				nFind++;
-		}
-		if (nFind > 10) // find 10 points
-		{
-			nImgLeft = j;
-			break;
-		}
-	}
-
-	// Check the right
-	for (j = pArea->right; j >= pArea->left; j--)
-	{
-		nFind = 0;
-		for (i = nImgTop; i <= nImgBottom; i++)
-		{
-			pBuff = pBmpBuff + i * nWidth * 4 + j * 4;
-			if (*(pBuff + 0) < cBlack || *(pBuff + 1) < cBlack || *(pBuff + 2) < cBlack)
-				nFind++;
-		}
-		if (nFind > 10) // find 10 points
-		{
-			nImgRight = j;
-			break;
-		}
-	}
 
 	CString strJpegFile;
 	strJpegFile.Format(_T("%s_%d.jpeg"), m_strJpegFile, m_nJpegIndex);
 
-	RECT rcEnc;
-	SetRect(&rcEnc, nImgLeft, nImgTop, nImgRight, nImgBottom);
 	m_pJpegFunc->Enc(&rcEnc, 65, strJpegFile);
 
 	//<img src="#" width="100" height="100" style=" margin-left:10px;" 
 	char szName[1024];
 	memset(szName, 0, sizeof(szName));
+	int nPos = strJpegFile.ReverseFind(_T('\\'));
+	strJpegFile = strJpegFile.Right(strJpegFile.GetLength() - nPos - 1);
 	WideCharToMultiByte(CP_ACP, 0, strJpegFile.GetString(), -1, szName, sizeof(szName), NULL, NULL);
 
-	nWidth = (nImgRight - nImgLeft) * m_nFontSize / m_nLineMinH * 3 / 2;
-	nHeight = (nImgBottom - nImgTop) * m_nFontSize / m_nLineMinH * 3 / 2;
+	int nWidth = (rcEnc.right - rcEnc.left) * m_nFontSize / m_nLineMinH * 3 / 2;
+	int nHeight = (rcEnc.bottom - rcEnc.top) * m_nFontSize / m_nLineMinH * 3 / 2;
 	char szLine[1024];
 	sprintf(szLine, "<img src=\"%s\" style=\"width: %dpx; height: %dpx>\" \r\n", szName, nWidth, nHeight);
 
-	if (nImgLeft > m_nLeft + m_nFontSize * 4)
+	if (rcEnc.left > m_nLeft + m_nFontSize * 4)
 		WriteText(pIO, "<p style = \"text-align: center; \"> \r\n");
-	else if (nImgRight > m_nRight - m_nFontSize * 4)
+	else if (rcEnc.right > m_nRight - m_nFontSize * 4)
 		WriteText(pIO, "<p style = \"text-align: right; \"> \r\n");
 	else
 		WriteText(pIO, "<p style = \"text-align: left; \"> \r\n");

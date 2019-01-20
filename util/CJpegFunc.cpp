@@ -133,6 +133,102 @@ int CJpegFunc::Draw(HWND hWnd, HDC hDC, RECT * pDraw)
 	return 0;
 }
 
+int	CJpegFunc::CheckSubImg(RECT * pArea, RECT * pSubImg)
+{
+	int nImgTop = 0;
+	int nImgLeft = pArea->left;
+	int nImgBottom = pArea->bottom;
+	int nImgRight = pArea->right;
+
+	int nWidth = GetWidth();
+	int nHeight = GetHeight();
+
+	int i, j, nFind;
+	unsigned char cBlack = 0X2F;
+	unsigned char * pBmpBuff = GetBuffer();
+	unsigned char * pBuff = NULL;
+	for (i = pArea->top; i <= pArea->bottom; i++)
+	{
+		nFind = 0;
+		for (j = pArea->left; j < pArea->right; j++)
+		{
+			pBuff = pBmpBuff + i * nWidth * 4 + j * 4;
+			if (*(pBuff + 0) < cBlack || *(pBuff + 1) < cBlack || *(pBuff + 2) < cBlack)
+				nFind++;
+		}
+
+		if (nFind > 10) // find 10 points
+		{
+			nImgTop = i;
+			break;
+		}
+	}
+	if (nImgTop == 0)
+		return 0;
+
+	// Check the bottom
+	for (i = pArea->bottom; i >= pArea->top; i--)
+	{
+		nFind = 0;
+		for (j = pArea->left; j < pArea->right; j++)
+		{
+			pBuff = pBmpBuff + i * nWidth * 4 + j * 4;
+			if (*(pBuff + 0) < cBlack || *(pBuff + 1) < cBlack || *(pBuff + 2) < cBlack)
+				nFind++;
+		}
+
+		if (nFind > 10) // find 10 points
+		{
+			nImgBottom = i;
+			break;
+		}
+	}
+
+	// Check the left
+	for (j = pArea->left; j < pArea->right; j++)
+	{
+		nFind = 0;
+		for (i = nImgTop; i <= nImgBottom; i++)
+		{
+			pBuff = pBmpBuff + i * nWidth * 4 + j * 4;
+			if (*(pBuff + 0) < cBlack || *(pBuff + 1) < cBlack || *(pBuff + 2) < cBlack)
+				nFind++;
+		}
+		if (nFind > 10) // find 10 points
+		{
+			nImgLeft = j;
+			break;
+		}
+	}
+
+	// Check the right
+	for (j = pArea->right; j >= pArea->left; j--)
+	{
+		nFind = 0;
+		for (i = nImgTop; i <= nImgBottom; i++)
+		{
+			pBuff = pBmpBuff + i * nWidth * 4 + j * 4;
+			if (*(pBuff + 0) < cBlack || *(pBuff + 1) < cBlack || *(pBuff + 2) < cBlack)
+				nFind++;
+		}
+		if (nFind > 10) // find 10 points
+		{
+			nImgRight = j;
+			break;
+		}
+	}
+
+	if (pSubImg != NULL)
+	{
+		pSubImg->left = nImgLeft;
+		pSubImg->top = nImgTop;
+		pSubImg->right = nImgRight;
+		pSubImg->bottom = nImgBottom;
+	}
+
+	return nFind;
+}
+
 int CJpegFunc::Enc(RECT * pRect, int nQuality, const TCHAR * pFile)
 {
 	if (m_pBmpBuff == NULL)
@@ -198,7 +294,8 @@ int CJpegFunc::Enc(RECT * pRect, int nQuality, const TCHAR * pFile)
 
 	jpeg_finish_compress(&cinfo); 
 	jpeg_destroy_compress(&cinfo);
-	fclose(hFile);  
+	fclose(hFile); 
+	delete[]pDataBuff;
 
 	return 0;
 }

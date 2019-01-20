@@ -45,6 +45,16 @@ CPic2HtmlDlg::CPic2HtmlDlg(CWnd* pParent /*=NULL*/)
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
 
+CPic2HtmlDlg::~CPic2HtmlDlg()
+{
+	TCHAR * pFileName = m_lstJpegFile.RemoveHead();
+	while (pFileName != NULL)
+	{
+		delete[]pFileName;
+		pFileName = m_lstJpegFile.RemoveHead();
+	}
+}
+
 void CPic2HtmlDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
@@ -57,6 +67,7 @@ BEGIN_MESSAGE_MAP(CPic2HtmlDlg, CDialog)
 	ON_WM_QUERYDRAGICON()
 	ON_MESSAGE(WM_CURL_FINISH, &CPic2HtmlDlg::OnCurlMessage)
 	ON_COMMAND(IDM_FILE_OPEN, &CPic2HtmlDlg::OnFileOpen)
+	ON_COMMAND(IDM_FILE_FOLDER, &CPic2HtmlDlg::OnFolderOpen)
 	ON_COMMAND(ID_FILE_EXIT, &CPic2HtmlDlg::OnFileExit)
 	ON_COMMAND(ID_VIEW_OPENHTML, &CPic2HtmlDlg::OnViewHTML)
 	ON_COMMAND(ID_HELP_ABOUT, &CPic2HtmlDlg::OnHelpAbout)
@@ -69,6 +80,7 @@ BOOL CPic2HtmlDlg::OnInitDialog()
 	InitAboutDialog();
 
 //	TempTest();
+//	OnFolderOpen();
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -167,6 +179,7 @@ LRESULT CPic2HtmlDlg::OnCurlMessage(WPARAM wParam, LPARAM lParam)
 	}
 
 	// 提取里面的文字信息
+	m_dataWord.SetJpegFunc(&m_jpegFunc);
 	if (m_dataWord.ParseData(&m_dataJson) < 0)
 	{
 		AfxMessageBox(_T("Parse word data error!"), MB_OK);
@@ -186,6 +199,9 @@ LRESULT CPic2HtmlDlg::OnCurlMessage(WPARAM wParam, LPARAM lParam)
 	m_webView.InvalidateRect(NULL, TRUE);
 	InvalidateRect(NULL, TRUE);
 	
+	if (m_lstJpegFile.GetCount() > 0)
+		ParseNextFile();
+
 	return S_OK;
 }
 
@@ -209,6 +225,74 @@ void CPic2HtmlDlg::OnFileOpen()
 
 	m_curlFunc.ParseFile(m_strJpegFile, m_hWnd);
 //	m_webView.Navigate(m_strHtmlFile, NULL, NULL, NULL, NULL);
+}
+
+void CPic2HtmlDlg::OnFolderOpen()
+{
+	TCHAR           szFolderPath[MAX_PATH] = { 0 };
+/*	BROWSEINFO      sInfo;
+	ZeroMemory(&sInfo, sizeof(BROWSEINFO));
+	sInfo.lpszTitle = _T("请选择图书扫描文件存储路径");
+	sInfo.ulFlags = BIF_RETURNONLYFSDIRS | BIF_EDITBOX | BIF_DONTGOBELOWDOMAIN;
+	// 显示文件夹选择对话框  
+	LPITEMIDLIST lpidlBrowse = SHBrowseForFolder(&sInfo);
+	if (lpidlBrowse == NULL)
+		return;
+	SHGetPathFromIDList(lpidlBrowse, szFolderPath);
+	CoTaskMemFree(lpidlBrowse);
+*/
+	_tcscpy(szFolderPath, _T("C:\\work\\Pic2Html\\book\\shediao"));
+	_tcscat(szFolderPath, _T("\\"));
+
+	TCHAR * pFileName = m_lstJpegFile.RemoveHead();
+	while (pFileName != NULL)
+	{
+		delete[]pFileName;
+		pFileName = m_lstJpegFile.RemoveHead();
+	}
+	
+	TCHAR	szFilter[1024];
+	_tcscpy(szFilter, szFolderPath);
+	_tcscat(szFilter, _T("*.*"));
+	WIN32_FIND_DATA  data;
+	HANDLE  hFind = FindFirstFile(szFilter, &data);
+	if (hFind == INVALID_HANDLE_VALUE)
+		return;
+	TCHAR * pExt = NULL;
+	hFind = FindFirstFile(szFilter, &data);
+	do
+	{
+		if (_tcslen(data.cFileName) < 3)
+			continue;
+		if ((data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY)
+			continue;
+		pExt = _tcsrchr(data.cFileName, _T('.'));
+		if (pExt == NULL)
+			continue;
+		_tcsupr(pExt);
+		if (_tcscmp(pExt, _T(".JPG")) == 0 || _tcscmp(pExt, _T(".JPEG")) == 0)
+		{
+			int		nLen = _tcslen(szFolderPath) + _tcslen(data.cFileName) + 2;
+			TCHAR * pJpegFile = new TCHAR[nLen];
+			memset(pJpegFile, 0, nLen);
+			_tcscpy(pJpegFile, szFolderPath);
+			_tcscat(pJpegFile, data.cFileName);
+			m_lstJpegFile.AddTail(pJpegFile);
+		}
+	} while (FindNextFile(hFind, &data));
+	FindClose(hFind);
+
+	TCHAR szSubFolder[1024];
+	_tcscpy(szSubFolder, szFolderPath);
+	_tcscat(szSubFolder, _T("html"));
+	CreateDirectory(szSubFolder, NULL);
+	_tcscpy(szSubFolder, szFolderPath);
+	_tcscat(szSubFolder, _T("image"));
+	CreateDirectory(szSubFolder, NULL);
+
+	m_pCurPos = m_lstJpegFile.GetHeadPosition();
+	ParseNextFile();
+	return;
 }
 
 void CPic2HtmlDlg::OnFileExit()
@@ -235,7 +319,7 @@ void CPic2HtmlDlg::TempTest(void)
 
 	m_strJpegFile = szPath;
 //	m_strJpegFile += _T("\\TestPic\\liuyong_01.jpeg");
-	m_strJpegFile += _T("\\TestPic\\Test02.jpg");
+	m_strJpegFile += _T("\\book\\shediao\\IMG_20190120_140252.jpg");
 	int nPos = m_strJpegFile.ReverseFind('.');
 	m_strHtmlFile = m_strJpegFile.Left(nPos + 1);
 	m_strHtmlFile = m_strHtmlFile + _T("html");
@@ -243,4 +327,56 @@ void CPic2HtmlDlg::TempTest(void)
 	m_jpegFunc.Dec(m_strJpegFile);
 
 	m_curlFunc.ParseFile(m_strJpegFile, m_hWnd);
+}
+
+void CPic2HtmlDlg::ParseNextFile(void)
+{
+	if (m_pCurPos == NULL)
+	{
+		if (m_lstJpegFile.GetCount() > 0)
+			AfxMessageBox(_T("所有的图片转换完成！"));
+		else
+			AfxMessageBox(_T("没有找到图片！"));
+		return;
+	}
+
+	m_strJpegFile = m_lstJpegFile.GetNext(m_pCurPos);
+	m_strHtmlFile = GetHtmlFileName (0);
+
+	m_dataHtml.SetPrevNextFile(GetHtmlFileName(-1), GetHtmlFileName(1));
+
+	m_jpegFunc.Dec(m_strJpegFile);
+	m_curlFunc.ParseFile(m_strJpegFile, m_hWnd);
+}
+
+TCHAR * CPic2HtmlDlg::GetHtmlFileName(int nPos)
+{
+	if (m_lstJpegFile.GetCount() < 0)
+		return NULL;
+
+	CString strJpefFile = m_strJpegFile;
+	
+	if (nPos == -1)
+	{
+		if (m_pCurPos == m_lstJpegFile.GetHeadPosition())
+			return NULL;
+		strJpefFile = m_lstJpegFile.GetPrev(m_pCurPos);
+		m_lstJpegFile.GetNext(m_pCurPos);
+	}
+	else if (nPos == 1)
+	{
+		if (m_pCurPos == NULL || m_pCurPos == m_lstJpegFile.GetTailPosition())
+			return NULL;
+		strJpefFile = m_lstJpegFile.GetNext(m_pCurPos);
+		m_lstJpegFile.GetPrev(m_pCurPos);
+	}
+
+	int nPos1 = strJpefFile.ReverseFind(_T('\\'));
+	m_strHtmlFile = strJpefFile.Left(nPos1);
+	m_strHtmlFile = m_strHtmlFile + _T("\\html");
+	int nPos2 = m_strJpegFile.ReverseFind(_T('.'));
+	m_strHtmlFile = m_strHtmlFile + strJpefFile.Mid(nPos1, nPos2 - nPos1);
+	m_strHtmlFile = m_strHtmlFile + _T(".html");
+
+	return m_strHtmlFile.GetBuffer();
 }
