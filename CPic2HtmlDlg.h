@@ -28,26 +28,31 @@ protected:
 protected:
 	HICON m_hIcon;
 
-	// Generated message map functions
+
+	// 初始化对话框
 	virtual BOOL OnInitDialog();
+	// CURL发回消息处理
 	afx_msg LRESULT OnCurlMessage(WPARAM wParam, LPARAM lParam);
+	// 选择JPEG文件
 	afx_msg void OnFileOpen();
+	// 退出程序
 	afx_msg void OnFileExit();
 	afx_msg void OnViewHTML();
 	afx_msg void OnHelpAbout();
 	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
+	// 重画窗口。
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
 	DECLARE_MESSAGE_MAP()
 
 public:
-	CExplorer1		m_webView;
-	CJpegFunc		m_jpegFunc;
-	CCurlFunc 		m_curlFunc;
-	CDataJson		m_dataJson;
-	CDataWord		m_dataWord;
-	CDataHtml		m_dataHtml;
+	CExplorer1		m_webView;		// 显示HTML文件的窗口
+	CJpegFunc		m_jpegFunc;		// JPEG包装类
+	CCurlFunc 		m_curlFunc;		// CURL包装类
+	CDataJson		m_dataJson;		// JSON包装类
+	CDataWord		m_dataWord;		// 文字包装类
+	CDataHtml		m_dataHtml;		// HTML包装类
 
-	CString			m_strJpegFile;
-	CString			m_strHtmlFile;
+	CString			m_strJpegFile;	// JPEG 文件名
+	CString			m_strHtmlFile;	// HTML 文件名
 };
