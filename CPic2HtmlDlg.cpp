@@ -79,7 +79,7 @@ BOOL CPic2HtmlDlg::OnInitDialog()
 	CDialog::OnInitDialog();
 	InitAboutDialog();
 
-//	TempTest();
+	TempTest();
 //	OnFolderOpen();
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
@@ -219,10 +219,7 @@ void CPic2HtmlDlg::OnFileOpen()
 		return;
 
 	InvalidateRect(NULL, TRUE);
-	int nPos = m_strJpegFile.ReverseFind('.');
-	m_strHtmlFile = m_strJpegFile.Left(nPos + 1);
-	m_strHtmlFile = m_strHtmlFile + _T("html");
-
+	m_strHtmlFile = GetHtmlFileName(0);
 	m_curlFunc.ParseFile(m_strJpegFile, m_hWnd);
 //	m_webView.Navigate(m_strHtmlFile, NULL, NULL, NULL, NULL);
 }
@@ -286,12 +283,10 @@ void CPic2HtmlDlg::OnFolderOpen()
 	_tcscpy(szSubFolder, szFolderPath);
 	_tcscat(szSubFolder, _T("html"));
 	CreateDirectory(szSubFolder, NULL);
-	_tcscpy(szSubFolder, szFolderPath);
-	_tcscat(szSubFolder, _T("image"));
-	CreateDirectory(szSubFolder, NULL);
 
 	m_pCurPos = m_lstJpegFile.GetHeadPosition();
 	ParseNextFile();
+
 	return;
 }
 
@@ -319,10 +314,8 @@ void CPic2HtmlDlg::TempTest(void)
 
 	m_strJpegFile = szPath;
 //	m_strJpegFile += _T("\\TestPic\\liuyong_01.jpeg");
-	m_strJpegFile += _T("\\book\\shediao\\IMG_20190120_140252.jpg");
-	int nPos = m_strJpegFile.ReverseFind('.');
-	m_strHtmlFile = m_strJpegFile.Left(nPos + 1);
-	m_strHtmlFile = m_strHtmlFile + _T("html");
+	m_strJpegFile += _T("\\book\\shediao\\3.jpg");
+	m_strHtmlFile = GetHtmlFileName(0);
 
 	m_jpegFunc.Dec(m_strJpegFile);
 
@@ -343,7 +336,9 @@ void CPic2HtmlDlg::ParseNextFile(void)
 	m_strJpegFile = m_lstJpegFile.GetNext(m_pCurPos);
 	m_strHtmlFile = GetHtmlFileName (0);
 
-	m_dataHtml.SetPrevNextFile(GetHtmlFileName(-1), GetHtmlFileName(1));
+	CString pPrev = GetHtmlFileName(-1);
+	CString pNext = GetHtmlFileName(1);
+	m_dataHtml.SetPrevNextFile(pPrev.GetBuffer(), pNext.GetBuffer());
 
 	m_jpegFunc.Dec(m_strJpegFile);
 	m_curlFunc.ParseFile(m_strJpegFile, m_hWnd);
@@ -351,32 +346,52 @@ void CPic2HtmlDlg::ParseNextFile(void)
 
 TCHAR * CPic2HtmlDlg::GetHtmlFileName(int nPos)
 {
-	if (m_lstJpegFile.GetCount() < 0)
+	if (m_lstJpegFile.GetCount() <= 0 && nPos != 0)
 		return NULL;
 
 	CString strJpefFile = m_strJpegFile;
-	
 	if (nPos == -1)
 	{
-		if (m_pCurPos == m_lstJpegFile.GetHeadPosition())
-			return NULL;
-		strJpefFile = m_lstJpegFile.GetPrev(m_pCurPos);
-		m_lstJpegFile.GetNext(m_pCurPos);
+		NODEPOS pPrev = m_pCurPos;
+		if (pPrev == NULL)
+		{
+			pPrev = m_lstJpegFile.GetTailPositionI();
+			m_lstJpegFile.GetPrev(pPrev);
+			if (pPrev == NULL)
+				return NULL;
+			else
+				strJpefFile = m_lstJpegFile.Get(pPrev);
+		}
+		else
+		{
+			m_lstJpegFile.GetPrev(pPrev);
+			if (pPrev == NULL)
+				return NULL;
+			else
+			{
+				m_lstJpegFile.GetPrev(pPrev);
+				if (pPrev == NULL)
+					return NULL;
+				else
+					strJpefFile = m_lstJpegFile.Get(pPrev);
+			}
+		}
 	}
 	else if (nPos == 1)
 	{
-		if (m_pCurPos == NULL || m_pCurPos == m_lstJpegFile.GetTailPosition())
+		NODEPOS pNext = m_pCurPos;
+		if (pNext == NULL)
 			return NULL;
-		strJpefFile = m_lstJpegFile.GetNext(m_pCurPos);
-		m_lstJpegFile.GetPrev(m_pCurPos);
+		else
+			strJpefFile = m_lstJpegFile.GetNext(pNext);
 	}
 
 	int nPos1 = strJpefFile.ReverseFind(_T('\\'));
-	m_strHtmlFile = strJpefFile.Left(nPos1);
-	m_strHtmlFile = m_strHtmlFile + _T("\\html");
-	int nPos2 = m_strJpegFile.ReverseFind(_T('.'));
-	m_strHtmlFile = m_strHtmlFile + strJpefFile.Mid(nPos1, nPos2 - nPos1);
-	m_strHtmlFile = m_strHtmlFile + _T(".html");
+	m_strHtmlName = strJpefFile.Left(nPos1);
+	m_strHtmlName = m_strHtmlName + _T("\\html");
+	int nPos2 = strJpefFile.ReverseFind(_T('.'));
+	m_strHtmlName = m_strHtmlName + strJpefFile.Mid(nPos1, nPos2 - nPos1);
+	m_strHtmlName = m_strHtmlName + _T(".html");
 
-	return m_strHtmlFile.GetBuffer();
+	return m_strHtmlName.GetBuffer();
 }

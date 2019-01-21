@@ -20,13 +20,14 @@
 
 CDataHtml::CDataHtml(void)
 	: m_pJpegFunc(NULL)
-	, m_nLeft(0)
-	, m_nRight(0)
-	, m_nTop(0)
-	, m_nBottom(0)
+	, m_nTxtLeft(0)
+	, m_nTxtRight(0)
+	, m_nTxtTop(0)
+	, m_nTxtBottom(0)
 	, m_nLineMaxWords(0)
 	, m_nLineMinH(0)
 	, m_nFontSize(16)
+	, m_dTxtScale(1)
 	, m_nJpegIndex(0)
 {
 	memset(m_szPrevFile, 0, sizeof(m_szPrevFile));
@@ -39,13 +40,16 @@ CDataHtml::~CDataHtml(void)
 
 void CDataHtml::SetPrevNextFile(TCHAR * strPrevFile, TCHAR * strNextFile)
 {
+	memset(m_szPrevFile, 0, sizeof(m_szPrevFile));
+	memset(m_szNextFile, 0, sizeof(m_szNextFile));
+
 	TCHAR * pFileName = 0;
-	if (strPrevFile != NULL)
+	if (strPrevFile != NULL && _tcslen(strPrevFile) > 0)
 	{
 		pFileName = _tcsrchr(strPrevFile, _T('\\')) + 1;
 		WideCharToMultiByte(CP_ACP, 0, pFileName, -1, m_szPrevFile, sizeof(m_szPrevFile), NULL, NULL);
 	}
-	if (strNextFile != NULL)
+	if (strNextFile != NULL && _tcslen(strNextFile) > 0)
 	{
 		pFileName = _tcsrchr(strNextFile, _T('\\')) + 1;
 		WideCharToMultiByte(CP_ACP, 0, pFileName, -1, m_szNextFile, sizeof(m_szNextFile), NULL, NULL);
@@ -95,9 +99,9 @@ int	CDataHtml::OutTextHtml(CDataWord * pWord, const TCHAR * pFile)
 		{
 			RECT rcArea;
 			if (pPrev != NULL)
-				SetRect(&rcArea, m_nLeft, pPrev->m_rcPos.bottom, m_nRight, pItem->m_rcPos.top);
+				SetRect(&rcArea, m_nTxtLeft, pPrev->m_rcPos.bottom, m_nTxtRight, pItem->m_rcPos.top);
 			else
-				SetRect(&rcArea, m_nLeft, 0, m_nRight, pItem->m_rcPos.top);
+				SetRect(&rcArea, m_nTxtLeft, 10, m_nTxtRight, pItem->m_rcPos.top);
 			nFindImage = CheckImageInfo(&outFile, &rcArea);
 		}
 		if (nFindImage == 0)
@@ -105,7 +109,7 @@ int	CDataHtml::OutTextHtml(CDataWord * pWord, const TCHAR * pFile)
 			int nIndex = 1;
 			while (nSpltHeight > nItemHeight * nIndex)
 			{
-				WriteText(&outFile, "<p style = \"height: 4px;\">&nbsp;</p>\r\n");
+				WriteText(&outFile, "<p style = \"height: 2px;\">&nbsp;</p>\r\n");
 				nIndex++;
 			}
 		}
@@ -115,23 +119,27 @@ int	CDataHtml::OutTextHtml(CDataWord * pWord, const TCHAR * pFile)
 
 		nPosFlag = 0;
 		nSpaceNum = 0;
-		if (m_nRight - pItem->m_rcPos.right <= nWordWidth * 2)
+		if (pItem->m_rcPos.left - m_nTxtLeft < nWordWidth * 2)
 		{
-			if (pItem->m_rcPos.left - m_nLeft > nWordWidth * 4)
+			nPosFlag = 0;
+		}
+		else if (m_nTxtRight - pItem->m_rcPos.right <= nWordWidth * 2)
+		{
+			if (pItem->m_rcPos.left - m_nTxtLeft > nWordWidth * 4)
 			{
 				nPosFlag = 2; // the pos is right
 			}
 		}
-		else if (abs((pItem->m_rcPos.left - m_nLeft) - (m_nRight - pItem->m_rcPos.right)) < nWordWidth * 4)
+		else if (abs((pItem->m_rcPos.left - m_nTxtLeft) - (m_nTxtRight - pItem->m_rcPos.right)) < nWordWidth * 4)
 		{
 			nPosFlag = 1;
 		}
 
 		if (nPosFlag == 0)
 		{
-			if (pItem->m_rcPos.left - m_nLeft >= nWordWidth)
+			if (pItem->m_rcPos.left - m_nTxtLeft >= nWordWidth)
 			{
-				nSpaceNum = (pItem->m_rcPos.left - m_nLeft) / nWordWidth + 1;
+				nSpaceNum = (pItem->m_rcPos.left - m_nTxtLeft) / nWordWidth + 1;
 			}
 		}
 
@@ -174,7 +182,7 @@ int	CDataHtml::OutTextHtml(CDataWord * pWord, const TCHAR * pFile)
 	if (pItem != NULL && pItem->m_rcPos.bottom + (pItem->m_rcPos.bottom - pItem->m_rcPos.top) * 3 < nBottom)
 	{
 		RECT rcArea;
-		SetRect(&rcArea, m_nLeft, pItem->m_rcPos.bottom, m_nRight, nBottom);
+		SetRect(&rcArea, m_nTxtLeft, pItem->m_rcPos.bottom, m_nTxtRight, nBottom);
 		CheckImageInfo(&outFile, &rcArea);
 	}
 
@@ -186,10 +194,10 @@ int	CDataHtml::OutTextHtml(CDataWord * pWord, const TCHAR * pFile)
 
 int	CDataHtml::ParserWordInfo(CDataWord * pWord)
 {
-	m_nLeft = 0XFFFF;
-	m_nRight = 0;
-	m_nTop = 0XFFFF;
-	m_nBottom = 0;
+	m_nTxtLeft = 0XFFFF;
+	m_nTxtRight = 0;
+	m_nTxtTop = 0XFFFF;
+	m_nTxtBottom = 0;
 	m_nLineMaxWords = 0;
 	m_nLineMinH = 0XFFFF;
 	wordItem * pItem = NULL;
@@ -197,14 +205,14 @@ int	CDataHtml::ParserWordInfo(CDataWord * pWord)
 	while (pos != NULL)
 	{
 		pItem = pWord->m_lstWord.GetNext(pos);
-		if (pItem->m_rcPos.left < m_nLeft)
-			m_nLeft = pItem->m_rcPos.left;
-		if (pItem->m_rcPos.right > m_nRight)
-			m_nRight = pItem->m_rcPos.right;
-		if (pItem->m_rcPos.top < m_nTop)
-			m_nTop = pItem->m_rcPos.top;
-		if (pItem->m_rcPos.bottom > m_nBottom)
-			m_nBottom = pItem->m_rcPos.bottom;
+		if (pItem->m_rcPos.left < m_nTxtLeft)
+			m_nTxtLeft = pItem->m_rcPos.left;
+		if (pItem->m_rcPos.right > m_nTxtRight)
+			m_nTxtRight = pItem->m_rcPos.right;
+		if (pItem->m_rcPos.top < m_nTxtTop)
+			m_nTxtTop = pItem->m_rcPos.top;
+		if (pItem->m_rcPos.bottom > m_nTxtBottom)
+			m_nTxtBottom = pItem->m_rcPos.bottom;
 		if (m_nLineMaxWords < (int)_tcslen(pItem->m_pTextWord))
 		{
 			m_nLineMaxWords = _tcslen(pItem->m_pTextWord);
@@ -237,14 +245,14 @@ int	CDataHtml::CheckImageInfo(CFile * pIO, RECT * pArea)
 	strJpegFile = strJpegFile.Right(strJpegFile.GetLength() - nPos - 1);
 	WideCharToMultiByte(CP_ACP, 0, strJpegFile.GetString(), -1, szName, sizeof(szName), NULL, NULL);
 
-	int nWidth = (rcEnc.right - rcEnc.left) * m_nFontSize / m_nLineMinH * 3 / 2;
-	int nHeight = (rcEnc.bottom - rcEnc.top) * m_nFontSize / m_nLineMinH * 3 / 2;
+	int nWidth = (rcEnc.right - rcEnc.left) * (m_nFontSize * (m_nLineMaxWords + 1)) / (m_nTxtRight - m_nTxtLeft);
+	int nHeight = nWidth * (rcEnc.bottom - rcEnc.top) / (rcEnc.right - rcEnc.left);
 	char szLine[1024];
-	sprintf(szLine, "<img src=\"%s\" style=\"width: %dpx; height: %dpx>\" \r\n", szName, nWidth, nHeight);
+	sprintf(szLine, "<img src=\"%s\" style=\"width: %dpx; height: %dpx\"> \r\n", szName, nWidth, nHeight);
 
-	if (rcEnc.left > m_nLeft + m_nFontSize * 4)
+	if (abs((rcEnc.left - m_nTxtLeft) - (m_nTxtRight - rcEnc.right)) < (int)((m_nFontSize * 4) * m_dTxtScale))
 		WriteText(pIO, "<p style = \"text-align: center; \"> \r\n");
-	else if (rcEnc.right > m_nRight - m_nFontSize * 4)
+	else if ((m_nTxtRight - rcEnc.right) < (int)((m_nFontSize * 4) * m_dTxtScale))
 		WriteText(pIO, "<p style = \"text-align: right; \"> \r\n");
 	else
 		WriteText(pIO, "<p style = \"text-align: left; \"> \r\n");
@@ -278,8 +286,10 @@ int CDataHtml::WriteHead(CFile * pIO)
 
 	sprintf(szLine, "        font-size: %dpx;\r\n", m_nFontSize);
 	strcat(szHead, szLine);
+	strcat(szHead,  "        line-height: 4px;\r\n");
 	sprintf(szLine, "        width: %dpx;\r\n", m_nFontSize * (m_nLineMaxWords + 1));
 	strcat(szHead, szLine);
+	m_dTxtScale = (double)(m_nTxtRight - m_nTxtLeft) / (m_nFontSize * (m_nLineMaxWords + 1));
 
 	strcat(szHead, "   }\r\n");
 	strcat(szHead, "</style>\r\n");
@@ -288,8 +298,25 @@ int CDataHtml::WriteHead(CFile * pIO)
 	strcat(szHead, "<body>\r\n");
 
 	strcat(szHead, " <div id=\"bookpage\">\r\n");
+	strcat(szHead, "<p>&nbsp</p>\r\n");
 
 	pIO->Write(szHead, strlen(szHead));
+
+	if (strlen(m_szPrevFile) > 0 || strlen(m_szNextFile) > 0)
+	{
+		memset(szHead, 0, sizeof(szHead));
+		if (strlen(m_szPrevFile) > 0)
+		{
+			sprintf(szLine, "<a href=\"%s\">prev &nbsp &nbsp &nbsp </a>\r\n", m_szPrevFile);
+			strcat(szHead, szLine);
+		}
+		if (strlen(m_szNextFile) > 0)
+		{
+			sprintf(szLine, "<a href=\"%s\">next</a>\r\n", m_szNextFile);
+			strcat(szHead, szLine);
+		}
+		pIO->Write(szHead, strlen(szHead));
+	}
 
 	return 0;
 }
@@ -299,7 +326,7 @@ int	CDataHtml::WriteFoot(CFile * pIO)
 	char szFoot[1024];
 	strcpy(szFoot, "\r\n</div>\r\n");
 
-	strcpy(szFoot, "\r\n</body>\r\n\r\n");
+	strcat(szFoot, "\r\n</body>\r\n\r\n");
 	strcat(szFoot, "\r\n</html>\r\n");
 
 	pIO->Write(szFoot, strlen(szFoot));

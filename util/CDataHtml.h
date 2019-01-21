@@ -63,13 +63,14 @@ protected:
 protected:
 	CJpegFunc *		m_pJpegFunc;			// JPEG的包装类指针
 
-	int				m_nLeft;				// 文字的最左边位置
-	int				m_nRight;				// 文字的最右边位置
-	int				m_nTop;					// 文字的最上边位置
-	int				m_nBottom;				// 文字的最下面位置
+	int				m_nTxtLeft;				// 文字的最左边位置
+	int				m_nTxtRight;			// 文字的最右边位置
+	int				m_nTxtTop;				// 文字的最上边位置
+	int				m_nTxtBottom;			// 文字的最下面位置
 	int				m_nLineMaxWords;		// 文字一行最多文字数字
 	int				m_nLineMinH;			// 文字一行最小的高度
 	int				m_nFontSize;			// 文字的字体尺寸
+	double			m_dTxtScale;			// 图片和HTML的缩放比例
 
 	CString			m_strJpegFile;			// 插图压缩后的JPEG文件名
 	int				m_nJpegIndex;			// 插图的索引号

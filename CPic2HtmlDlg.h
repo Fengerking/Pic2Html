@@ -32,7 +32,6 @@ protected:
 protected:
 	HICON m_hIcon;
 
-
 	// 初始化对话框
 	virtual BOOL OnInitDialog();
 	// CURL发回消息处理
@@ -61,6 +60,7 @@ public:
 
 	CString			m_strJpegFile;	// JPEG 文件名
 	CString			m_strHtmlFile;	// HTML 文件名
+	CString			m_strHtmlName;	// 临时文件名
 
 	CObjectList<TCHAR>	m_lstJpegFile;
 	NODEPOS				m_pCurPos;
