@@ -24,6 +24,7 @@ public:
 
 	// 设置JPEG包装类指针，进行插图判断，插图压缩。
 	virtual void	SetJpegFunc(CJpegFunc * pJpegFunc) { m_pJpegFunc = pJpegFunc; }
+	// 设置前一页，后一页的链接信息。
 	virtual void	SetPrevNextFile(TCHAR * strPrevFile, TCHAR * strNextFile);
 
 	// 输出HTML格式文件
