@@ -307,7 +307,7 @@ int CDataHtml::WriteHead(CFile * pIO)
 		memset(szHead, 0, sizeof(szHead));
 		if (strlen(m_szPrevFile) > 0)
 		{
-			sprintf(szLine, "<a href=\"%s\">prev &nbsp &nbsp &nbsp </a>\r\n", m_szPrevFile);
+			sprintf(szLine, "<a href=\"%s\">prev</a> &nbsp &nbsp &nbsp \r\n", m_szPrevFile);
 			strcat(szHead, szLine);
 		}
 		if (strlen(m_szNextFile) > 0)

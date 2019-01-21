@@ -79,7 +79,7 @@ BOOL CPic2HtmlDlg::OnInitDialog()
 	CDialog::OnInitDialog();
 	InitAboutDialog();
 
-	TempTest();
+//	TempTest();
 //	OnFolderOpen();
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
@@ -219,6 +219,12 @@ void CPic2HtmlDlg::OnFileOpen()
 		return;
 
 	InvalidateRect(NULL, TRUE);
+
+	int nPos1 = m_strJpegFile.ReverseFind(_T('\\'));
+	CString strHtmlFolder = m_strJpegFile.Left(nPos1);
+	strHtmlFolder = strHtmlFolder + _T("\\html");
+	CreateDirectory(strHtmlFolder, NULL);
+
 	m_strHtmlFile = GetHtmlFileName(0);
 	m_curlFunc.ParseFile(m_strJpegFile, m_hWnd);
 //	m_webView.Navigate(m_strHtmlFile, NULL, NULL, NULL, NULL);
@@ -227,7 +233,7 @@ void CPic2HtmlDlg::OnFileOpen()
 void CPic2HtmlDlg::OnFolderOpen()
 {
 	TCHAR           szFolderPath[MAX_PATH] = { 0 };
-/*	BROWSEINFO      sInfo;
+	BROWSEINFO      sInfo;
 	ZeroMemory(&sInfo, sizeof(BROWSEINFO));
 	sInfo.lpszTitle = _T("请选择图书扫描文件存储路径");
 	sInfo.ulFlags = BIF_RETURNONLYFSDIRS | BIF_EDITBOX | BIF_DONTGOBELOWDOMAIN;
@@ -237,8 +243,8 @@ void CPic2HtmlDlg::OnFolderOpen()
 		return;
 	SHGetPathFromIDList(lpidlBrowse, szFolderPath);
 	CoTaskMemFree(lpidlBrowse);
-*/
-	_tcscpy(szFolderPath, _T("C:\\work\\Pic2Html\\book\\shediao"));
+
+//	_tcscpy(szFolderPath, _T("C:\\work\\Pic2Html\\book\\shediao"));
 	_tcscat(szFolderPath, _T("\\"));
 
 	TCHAR * pFileName = m_lstJpegFile.RemoveHead();
