@@ -200,7 +200,7 @@ int	CDataHtml::ParserWordInfo(CDataWord * pWord)
 	m_nTxtBottom = 0;
 	m_nLineMaxWords = 0;
 	m_nLineMinH = 0XFFFF;
-	wordItem * pItem = NULL;
+	wordItem *	pItem = NULL;
 	NODEPOS pos = pWord->m_lstWord.GetHeadPosition();
 	while (pos != NULL)
 	{
@@ -213,9 +213,39 @@ int	CDataHtml::ParserWordInfo(CDataWord * pWord)
 			m_nTxtTop = pItem->m_rcPos.top;
 		if (pItem->m_rcPos.bottom > m_nTxtBottom)
 			m_nTxtBottom = pItem->m_rcPos.bottom;
-		if (m_nLineMaxWords < (int)_tcslen(pItem->m_pTextWord))
+		
+		unsigned char *	pTxtSrc = (unsigned char *)pItem->m_pTextJson;
+		unsigned char *	pTxtPos = pTxtSrc;
+		int				nTxtLen = strlen((char *)pTxtSrc);
+		int				nTxtNum = 0;
+		while (pTxtPos - pTxtSrc < nTxtLen)
 		{
-			m_nLineMaxWords = _tcslen(pItem->m_pTextWord);
+			if ((*pTxtPos & 0X80) == 0)
+			{
+				pTxtPos++;
+				nTxtNum++;
+			}
+			else if ((*pTxtPos & 0XE0) == 0XC0)
+			{
+				pTxtPos += 2;
+			}
+			else if ((*pTxtPos & 0XF0) == 0XE0)
+			{
+				pTxtPos += 3;
+			}
+			else if ((*pTxtPos & 0XF8) == 0XF0)
+			{
+				pTxtPos += 4;
+			}
+			else
+			{
+				pTxtPos += 5;
+			}
+		}
+		int nWordNum = (int)_tcslen(pItem->m_pTextWord) - nTxtNum / 2;
+		if (m_nLineMaxWords < nWordNum)
+		{
+			m_nLineMaxWords = nWordNum;
 			if (m_nLineMinH > (pItem->m_rcPos.bottom - pItem->m_rcPos.top))
 				m_nLineMinH = pItem->m_rcPos.bottom - pItem->m_rcPos.top;
 		}
@@ -245,7 +275,7 @@ int	CDataHtml::CheckImageInfo(CFile * pIO, RECT * pArea)
 	strJpegFile = strJpegFile.Right(strJpegFile.GetLength() - nPos - 1);
 	WideCharToMultiByte(CP_ACP, 0, strJpegFile.GetString(), -1, szName, sizeof(szName), NULL, NULL);
 
-	int nWidth = (rcEnc.right - rcEnc.left) * (m_nFontSize * (m_nLineMaxWords + 1)) / (m_nTxtRight - m_nTxtLeft);
+	int nWidth = (rcEnc.right - rcEnc.left) * (m_nFontSize * (m_nLineMaxWords)) / (m_nTxtRight - m_nTxtLeft);
 	int nHeight = nWidth * (rcEnc.bottom - rcEnc.top) / (rcEnc.right - rcEnc.left);
 	char szLine[1024];
 	sprintf(szLine, "<img src=\"%s\" style=\"width: %dpx; height: %dpx\"> \r\n", szName, nWidth, nHeight);
@@ -283,13 +313,14 @@ int CDataHtml::WriteHead(CFile * pIO)
 
 	strcat(szHead, "<style>\r\n");
 	strcat(szHead, "   #bookpage{\r\n");
+	strcat(szHead, "          margin: 0px auto;\r\n");
 
-	sprintf(szLine, "        font-size: %dpx;\r\n", m_nFontSize);
+	sprintf(szLine, "         font-size: %dpx;\r\n", m_nFontSize);
 	strcat(szHead, szLine);
-	strcat(szHead,  "        line-height: 4px;\r\n");
-	sprintf(szLine, "        width: %dpx;\r\n", m_nFontSize * (m_nLineMaxWords + 1));
+	strcat(szHead,  "         line-height: 4px;\r\n");
+	sprintf(szLine, "         width: %dpx;\r\n", m_nFontSize * (m_nLineMaxWords));
 	strcat(szHead, szLine);
-	m_dTxtScale = (double)(m_nTxtRight - m_nTxtLeft) / (m_nFontSize * (m_nLineMaxWords + 1));
+	m_dTxtScale = (double)(m_nTxtRight - m_nTxtLeft) / (m_nFontSize * (m_nLineMaxWords));
 
 	strcat(szHead, "   }\r\n");
 	strcat(szHead, "</style>\r\n");
