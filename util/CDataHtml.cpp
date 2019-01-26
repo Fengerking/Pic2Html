@@ -99,7 +99,7 @@ int	CDataHtml::OutTextHtml(CDataWord * pWord, const TCHAR * pFile)
 		{
 			RECT rcArea;
 			if (pPrev != NULL)
-				SetRect(&rcArea, m_nTxtLeft, pPrev->m_rcPos.bottom, m_nTxtRight, pItem->m_rcPos.top);
+				SetRect(&rcArea, m_nTxtLeft, pPrev->m_rcPos.bottom, m_pJpegFunc->GetWidth()-10, pItem->m_rcPos.top);
 			else
 				SetRect(&rcArea, m_nTxtLeft, 10, m_nTxtRight, pItem->m_rcPos.top);
 			nFindImage = CheckImageInfo(&outFile, &rcArea);

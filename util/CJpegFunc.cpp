@@ -147,6 +147,7 @@ int	CJpegFunc::CheckSubImg(RECT * pArea, RECT * pSubImg)
 	unsigned char cBlack = 0X2F;
 	unsigned char * pBmpBuff = GetBuffer();
 	unsigned char * pBuff = NULL;
+	int nMinFind = 10;
 	for (i = pArea->top; i <= pArea->bottom; i++)
 	{
 		nFind = 0;
@@ -157,7 +158,7 @@ int	CJpegFunc::CheckSubImg(RECT * pArea, RECT * pSubImg)
 				nFind++;
 		}
 
-		if (nFind > 10) // find 10 points
+		if (nFind > nMinFind) // find 10 points
 		{
 			nImgTop = i;
 			break;
@@ -177,7 +178,7 @@ int	CJpegFunc::CheckSubImg(RECT * pArea, RECT * pSubImg)
 				nFind++;
 		}
 
-		if (nFind > 10) // find 10 points
+		if (nFind > nMinFind) // find 10 points
 		{
 			nImgBottom = i;
 			break;
@@ -194,7 +195,7 @@ int	CJpegFunc::CheckSubImg(RECT * pArea, RECT * pSubImg)
 			if (*(pBuff + 0) < cBlack || *(pBuff + 1) < cBlack || *(pBuff + 2) < cBlack)
 				nFind++;
 		}
-		if (nFind > 10) // find 10 points
+		if (nFind > nMinFind) // find 10 points
 		{
 			nImgLeft = j;
 			break;
@@ -211,7 +212,7 @@ int	CJpegFunc::CheckSubImg(RECT * pArea, RECT * pSubImg)
 			if (*(pBuff + 0) < cBlack || *(pBuff + 1) < cBlack || *(pBuff + 2) < cBlack)
 				nFind++;
 		}
-		if (nFind > 10) // find 10 points
+		if (nFind > nMinFind) // find 10 points
 		{
 			nImgRight = j;
 			break;
